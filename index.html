@@ -388,10 +388,16 @@
             </div>
 
             <!-- Planned Expenses -->
-            <div class="section">
-                <div class="section-header">Планируемые расходы</div>
-                <div id="planned-expenses-list"></div>
-            </div>
+            <!-- Planned Expenses -->
+<div class="section">
+    <div class="section-header">Обязательные расходы</div>
+    <div id="required-expenses-list"></div>
+</div>
+
+<div class="section">
+    <div class="section-header">Необязательные расходы</div>
+    <div id="optional-expenses-list"></div>
+</div>
 
             <!-- Planned Incomes -->
             <div class="section">
@@ -798,6 +804,50 @@
         </form>
     </div>
 </div>
+<!-- Edit Linked Expense Modal -->
+<div id="edit-linked-expense-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Изменить расход</div>
+        <form id="edit-linked-expense-form">
+            <div class="form-group">
+                <label class="form-label">Название</label>
+                <input type="text" class="form-input" name="name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Категория</label>
+                <select class="form-select" name="category" required></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Сумма</label>
+                <input type="number" class="form-input" name="amount" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Дата (опционально)</label>
+                <input type="date" class="form-input" name="plannedDate">
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('edit-linked-expense-modal')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Execute Linked Expense Modal -->
+<div id="execute-linked-expense-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Выполнить расход из дохода</div>
+        <div id="execute-linked-expense-info"></div>
+        <div class="form-group">
+            <label class="form-label">Счет списания</label>
+            <select class="form-select" id="execute-linked-expense-account" required></select>
+        </div>
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('execute-linked-expense-modal')">Отмена</button>
+            <button type="button" class="btn btn-primary" onclick="confirmExecuteLinkedExpense()">Выполнить</button>
+        </div>
+    </div>
+</div>
     <script>
         // Data structure
         let data = {
@@ -815,6 +865,9 @@
         let currentExecutingIncomeId = null;
         let currentExecutingExpenseId = null;
         let currentAddingExpenseToIncomeId = null;
+        let currentEditingLinkedExpenseId = null;
+let currentExecutingLinkedExpenseId = null;
+let currentExecutingLinkedExpenseIncomeId = null;
 
         // Initialize app
         function init() {
@@ -1035,32 +1088,63 @@ function updateCategorySelects(modalId) {
         }
 
         function updatePlannedExpensesList() {
-            const container = document.getElementById('planned-expenses-list');
-            const expenses = data.plannedExpenses.filter(exp => !exp.linkedToIncomeId);
-            
-            if (expenses.length === 0) {
-                container.innerHTML = '<div class="item" style="text-align: center; color: #666;">Нет планируемых расходов</div>';
-                return;
-            }
-            
-            container.innerHTML = expenses.map(expense => `
-                <div class="item">
-                    <div class="item-info">
-                        <div class="item-name">${expense.name}</div>
-                        <div class="item-details">
-                            ${expense.category} • ${expense.plannedDate ? formatDate(expense.plannedDate) : 'Дата не указана'}
-                            ${expense.isRequired ? ' • Обязательный' : ' • Необязательный'}
-                        </div>
-                    </div>
-                    <div class="item-amount">${formatCurrency(expense.amount)}</div>
-                    <div class="item-actions">
-                        <button class="icon-btn edit" onclick="editExpense('${expense.id}')" title="Изменить">✏️</button>
-                        <button class="icon-btn complete" onclick="executeExpense('${expense.id}')" title="Выполнить">✅</button>
-                        <button class="icon-btn delete" onclick="deleteExpense('${expense.id}')" title="Удалить">🗑️</button>
-                    </div>
+    updateRequiredExpensesList();
+    updateOptionalExpensesList();
+}
+
+function updateRequiredExpensesList() {
+    const container = document.getElementById('required-expenses-list');
+    const expenses = data.plannedExpenses.filter(exp => !exp.linkedToIncomeId && exp.isRequired);
+    
+    if (expenses.length === 0) {
+        container.innerHTML = '<div class="item" style="text-align: center; color: #666;">Нет обязательных расходов</div>';
+        return;
+    }
+    
+    container.innerHTML = expenses.map(expense => `
+        <div class="item">
+            <div class="item-info">
+                <div class="item-name">${expense.name}</div>
+                <div class="item-details">
+                    ${expense.category} • ${expense.plannedDate ? formatDate(expense.plannedDate) : 'Дата не указана'}
                 </div>
-            `).join('');
-        }
+            </div>
+            <div class="item-amount">${formatCurrency(expense.amount)}</div>
+            <div class="item-actions">
+                <button class="icon-btn edit" onclick="editExpense('${expense.id}')" title="Изменить">✏️</button>
+                <button class="icon-btn complete" onclick="executeExpense('${expense.id}')" title="Выполнить">✅</button>
+                <button class="icon-btn delete" onclick="deleteExpense('${expense.id}')" title="Удалить">🗑️</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateOptionalExpensesList() {
+    const container = document.getElementById('optional-expenses-list');
+    const expenses = data.plannedExpenses.filter(exp => !exp.linkedToIncomeId && !exp.isRequired);
+    
+    if (expenses.length === 0) {
+        container.innerHTML = '<div class="item" style="text-align: center; color: #666;">Нет необязательных расходов</div>';
+        return;
+    }
+    
+    container.innerHTML = expenses.map(expense => `
+        <div class="item">
+            <div class="item-info">
+                <div class="item-name">${expense.name}</div>
+                <div class="item-details">
+                    ${expense.category} • ${expense.plannedDate ? formatDate(expense.plannedDate) : 'Дата не указана'}
+                </div>
+            </div>
+            <div class="item-amount">${formatCurrency(expense.amount)}</div>
+            <div class="item-actions">
+                <button class="icon-btn edit" onclick="editExpense('${expense.id}')" title="Изменить">✏️</button>
+                <button class="icon-btn complete" onclick="executeExpense('${expense.id}')" title="Выполнить">✅</button>
+                <button class="icon-btn delete" onclick="deleteExpense('${expense.id}')" title="Удалить">🗑️</button>
+            </div>
+        </div>
+    `).join('');
+}
 
 
         let currentEditingAccountId = null;
@@ -1076,6 +1160,109 @@ function editAccount(accountId) {
     form.balance.value = account.balance;
     
     openModal('edit-account-modal');
+}
+
+function editLinkedExpense(expenseId) {
+    const expense = data.plannedExpenses.find(exp => exp.id === expenseId);
+    if (!expense) return;
+    
+    currentEditingLinkedExpenseId = expenseId;
+    
+    const form = document.getElementById('edit-linked-expense-form');
+    form.name.value = expense.name;
+    form.category.value = expense.category;
+    form.amount.value = expense.amount;
+    form.plannedDate.value = expense.plannedDate || '';
+    
+    openModal('edit-linked-expense-modal');
+}
+
+function handleEditLinkedExpense(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    const expense = data.plannedExpenses.find(exp => exp.id === currentEditingLinkedExpenseId);
+    if (expense) {
+        expense.name = formData.get('name');
+        expense.category = formData.get('category');
+        expense.amount = parseFloat(formData.get('amount'));
+        expense.plannedDate = formData.get('plannedDate') || null;
+        
+        saveData();
+        updateUI();
+    }
+    
+    closeModal('edit-linked-expense-modal');
+    currentEditingLinkedExpenseId = null;
+}
+
+function executeLinkedExpense(expenseId, incomeId) {
+    const expense = data.plannedExpenses.find(exp => exp.id === expenseId);
+    if (!expense) return;
+    
+    currentExecutingLinkedExpenseId = expenseId;
+    currentExecutingLinkedExpenseIncomeId = incomeId;
+    
+    document.getElementById('execute-linked-expense-info').innerHTML = `
+        <div style="margin-bottom: 15px;">
+            <strong>${expense.name}</strong><br>
+            ${expense.category}<br>
+            ${formatCurrency(expense.amount)}<br>
+            <small style="color: #666;">Будет списан из привязанного дохода</small>
+        </div>
+    `;
+    
+    openModal('execute-linked-expense-modal');
+}
+
+function confirmExecuteLinkedExpense() {
+    const accountId = document.getElementById('execute-linked-expense-account').value;
+    if (!accountId) {
+        alert('Выберите счет');
+        return;
+    }
+    
+    const expense = data.plannedExpenses.find(exp => exp.id === currentExecutingLinkedExpenseId);
+    const income = data.plannedIncomes.find(inc => inc.id === currentExecutingLinkedExpenseIncomeId);
+    const account = data.accounts.find(acc => acc.id === accountId);
+    
+    if (!expense || !account) return;
+    
+    if (account.balance < expense.amount) {
+        alert('Недостаточно средств на счете');
+        return;
+    }
+    
+    // Списать с счета
+    account.balance -= expense.amount;
+    
+    // Добавить в историю
+    data.completedTransactions.push({
+        id: generateId(),
+        name: `${expense.name} (из дохода: ${income ? income.name : 'Удаленный доход'})`,
+        category: expense.category,
+        amount: expense.amount,
+        date: new Date().toISOString().split('T')[0],
+        type: 'expense',
+        accountName: account.name
+    });
+    
+    // Удалить выполненный расход
+    data.plannedExpenses = data.plannedExpenses.filter(exp => exp.id !== currentExecutingLinkedExpenseId);
+    
+    saveData();
+    updateUI();
+    closeModal('execute-linked-expense-modal');
+    currentExecutingLinkedExpenseId = null;
+    currentExecutingLinkedExpenseIncomeId = null;
+}
+
+function deleteLinkedExpense(expenseId) {
+    if (confirm('Удалить привязанный расход?')) {
+        data.plannedExpenses = data.plannedExpenses.filter(exp => exp.id !== expenseId);
+        saveData();
+        updateUI();
+    }
 }
 
 function handleEditAccount(e) {
@@ -1123,10 +1310,25 @@ function handleEditAccount(e) {
                                 ${income.category} • ${income.plannedDate ? formatDate(income.plannedDate) : 'Дата не указана'}
                             </div>
                             <div class="linked-expenses" id="linked-expenses-${income.id}" style="display: none;">
-                                ${linkedExpenses.map(exp => 
-                                    `<div class="linked-expense">- ${exp.name}: ${formatCurrency(exp.amount)}</div>`
-                                ).join('')}
-                            </div>
+    ${linkedExpenses.map(exp => `
+        <div class="linked-expense">
+            <div class="item" style="margin: 0; padding: 8px 0; border: none;">
+                <div class="item-info">
+                    <div class="item-name" style="font-size: 12px;">- ${exp.name}</div>
+                    <div class="item-details" style="font-size: 10px;">
+                        ${exp.category} • ${exp.plannedDate ? formatDate(exp.plannedDate) : 'Дата не указана'}
+                    </div>
+                </div>
+                <div class="item-amount" style="font-size: 12px;">${formatCurrency(exp.amount)}</div>
+                <div class="item-actions">
+                    <button class="icon-btn edit" style="width: 24px; height: 24px;" onclick="editLinkedExpense('${exp.id}')" title="Изменить">✏️</button>
+                    <button class="icon-btn complete" style="width: 24px; height: 24px;" onclick="executeLinkedExpense('${exp.id}', '${income.id}')" title="Выполнить">✅</button>
+                    <button class="icon-btn delete" style="width: 24px; height: 24px;" onclick="deleteLinkedExpense('${exp.id}')" title="Удалить">🗑️</button>
+                </div>
+            </div>
+        </div>
+    `).join('')}
+</div>
                         </div>
                         <div class="income-display">
                             <div class="item-amount">${formatCurrency(remaining)}/${formatCurrency(income.amount)}</div>
@@ -1269,6 +1471,7 @@ function handleEditAccount(e) {
             document.getElementById('edit-income-form').addEventListener('submit', handleEditIncome);
             document.getElementById('add-linked-expense-form').addEventListener('submit', handleAddLinkedExpense);
             document.getElementById('edit-account-form').addEventListener('submit', handleEditAccount);
+            document.getElementById('edit-linked-expense-form').addEventListener('submit', handleEditLinkedExpense);
         }
 
         // Form Handlers
