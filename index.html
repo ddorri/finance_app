@@ -759,6 +759,7 @@
                     <label class="form-label">Категория</label>
                     <select class="form-select" name="category" required>
     <option value="">Выберите категорию</option>
+    
     <!-- Здесь будут подтягиваться категории -->
 </select>
                 </div>
@@ -777,7 +778,26 @@
             </form>
         </div>
     </div>
-
+<!-- Edit Account Modal -->
+<div id="edit-account-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Изменить счет</div>
+        <form id="edit-account-form">
+            <div class="form-group">
+                <label class="form-label">Название</label>
+                <input type="text" class="form-input" name="name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Баланс</label>
+                <input type="number" class="form-input" name="balance" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('edit-account-modal')">Отмена</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
     <script>
         // Data structure
         let data = {
@@ -1042,13 +1062,53 @@ function updateCategorySelects(modalId) {
             `).join('');
         }
 
+
+        let currentEditingAccountId = null;
+
+function editAccount(accountId) {
+    const account = data.accounts.find(acc => acc.id === accountId);
+    if (!account) return;
+    
+    currentEditingAccountId = accountId;
+    
+    const form = document.getElementById('edit-account-form');
+    form.name.value = account.name;
+    form.balance.value = account.balance;
+    
+    openModal('edit-account-modal');
+}
+
+function handleEditAccount(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    const account = data.accounts.find(acc => acc.id === currentEditingAccountId);
+    if (account) {
+        account.name = formData.get('name');
+        account.balance = parseFloat(formData.get('balance'));
+        
+        saveData();
+        updateUI();
+    }
+    
+    closeModal('edit-account-modal');
+    currentEditingAccountId = null;
+}
         function updatePlannedIncomesList() {
             const container = document.getElementById('planned-incomes-list');
-            
-            if (data.plannedIncomes.length === 0) {
-                container.innerHTML = '<div class="item" style="text-align: center; color: #666;">Нет планируемых доходов</div>';
-                return;
-            }
+    
+    if (data.plannedIncomes.length === 0) {
+        container.innerHTML = '<div class="item" style="text-align: center; color: #666;">Нет планируемых доходов</div>';
+        return;
+    }
+    
+    // Сортировка по дате (доходы без даты в конец)
+    const sortedIncomes = [...data.plannedIncomes].sort((a, b) => {
+        if (!a.plannedDate && !b.plannedDate) return 0;
+        if (!a.plannedDate) return 1;
+        if (!b.plannedDate) return -1;
+        return new Date(a.plannedDate) - new Date(b.plannedDate);
+    });
             
             container.innerHTML = data.plannedIncomes.map(income => {
                 const linkedExpenses = data.plannedExpenses.filter(exp => exp.linkedToIncomeId === income.id);
@@ -1113,8 +1173,9 @@ function updateCategorySelects(modalId) {
                     </div>
                     <div class="item-amount">${formatCurrency(account.balance)}</div>
                     <div class="item-actions">
-                        <button class="icon-btn delete" onclick="deleteAccount('${account.id}')" title="Удалить">🗑️</button>
-                    </div>
+    <button class="icon-btn edit" onclick="editAccount('${account.id}')" title="Изменить">✏️</button>
+    <button class="icon-btn delete" onclick="deleteAccount('${account.id}')" title="Удалить">🗑️</button>
+</div>
                 </div>
             `).join('');
         }
@@ -1207,6 +1268,7 @@ function updateCategorySelects(modalId) {
             document.getElementById('planned-income-form').addEventListener('submit', handleAddPlannedIncome);
             document.getElementById('edit-income-form').addEventListener('submit', handleEditIncome);
             document.getElementById('add-linked-expense-form').addEventListener('submit', handleAddLinkedExpense);
+            document.getElementById('edit-account-form').addEventListener('submit', handleEditAccount);
         }
 
         // Form Handlers
@@ -1597,6 +1659,78 @@ function updateCategorySelects(modalId) {
             
             openModal('planned-expense-modal');
         }
+
+
+        function addCategory(type) {
+    const name = prompt(`Название новой категории ${type === 'income' ? 'дохода' : 'расхода'}:`);
+    if (name && name.trim()) {
+        data.categories[type].push(name.trim());
+        saveData();
+        updateUI();
+    }
+}
+
+function deleteCategory(type, index) {
+    if (confirm('Удалить категорию?')) {
+        data.categories[type].splice(index, 1);
+        saveData();
+        updateUI();
+    }
+}
+
+function updateCategoriesList() {
+    const container = document.getElementById('categories-list');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div class="section" style="margin-bottom: 20px;">
+            <div class="section-header">Категории доходов</div>
+            ${data.categories.income.map((cat, index) => `
+                <div class="item">
+                    <div class="item-info">
+                        <div class="item-name">${cat}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="icon-btn delete" onclick="deleteCategory('income', ${index})" title="Удалить">🗑️</button>
+                    </div>
+                </div>
+            `).join('')}
+            <div style="padding: 15px 20px;">
+                <button class="btn btn-secondary" onclick="addCategory('income')">➕ Добавить категорию дохода</button>
+            </div>
+        </div>
+        <div class="section">
+            <div class="section-header">Категории расходов</div>
+            ${data.categories.expense.map((cat, index) => `
+                <div class="item">
+                    <div class="item-info">
+                        <div class="item-name">${cat}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="icon-btn delete" onclick="deleteCategory('expense', ${index})" title="Удалить">🗑️</button>
+                    </div>
+                </div>
+            `).join('')}
+            <div style="padding: 15px 20px;">
+                <button class="btn btn-secondary" onclick="addCategory('expense')">➕ Добавить категорию расхода</button>
+            </div>
+        </div>
+    `;
+}
+
+function updateCategorySelects(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    
+    const categorySelect = modal.querySelector('select[name="category"]');
+    if (!categorySelect) return;
+    
+    const isIncomeModal = modalId.includes('income');
+    const categories = isIncomeModal ? data.categories.income : data.categories.expense;
+    
+    categorySelect.innerHTML = '<option value="">Выберите категорию</option>' +
+        categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+}
 
         function deleteAccount(accountId) {
             const account = data.accounts.find(acc => acc.id === accountId);
