@@ -1,0 +1,40 @@
+{
+  "name": "Финансовый Трекер",
+  "short_name": "FinTracker",
+  "description": "Приложение для управления личными финансами",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#007fff",
+  "theme_color": "#007fff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMzIiIGZpbGw9IiMwMDdmZmYiLz4KPHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgeD0iMzIiIHk9IjMyIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgo8cGF0aCBkPSJNMTIgMnY2bTYgNmgtNm02IDZIMTJNNiAxMmg2TTEyIDE0djZNOSA5TDcuNSA3LjVNOSAxNUw3LjUgMTYuNSIvPgo8L3N2Zz4KPC9zdmc+",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iODYiIGZpbGw9IiMwMDdmZmYiLz4KPHN2ZyB3aWR0aD0iMzQwIiBoZWlnaHQ9IjM0MCIgeD0iODYiIHk9Ijg2IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgo8cGF0aCBkPSJNMTIgMnY2bTYgNmgtNm02IDZIMTJNNiAxMmg2TTEyIDE0djZNOSA5TDcuNSA3LjVNOSAxNUw3LjUgMTYuNSIvPgo8L3N2Zz4KPC9zdmc+",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "lang": "ru",
+  "shortcuts": [
+    {
+      "name": "Добавить расход",
+      "short_name": "Расход",
+      "description": "Быстро добавить новый расход",
+      "url": "./?action=expense",
+      "icons": []
+    },
+    {
+      "name": "Добавить доход", 
+      "short_name": "Доход",
+      "description": "Быстро добавить новый доход",
+      "url": "./?action=income",
+      "icons": []
+    }
+  ]
+}
