@@ -355,6 +355,35 @@
             font-size: 14px;
             color: #666;
         }
+        .progress-bar {
+    height: 4px;
+    border-radius: 2px;
+    margin-top: 5px;
+    transition: width 0.3s ease;
+}
+
+.analytics-metric {
+    text-align: center;
+    padding: 10px;
+}
+
+.analytics-metric-value {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.analytics-metric-label {
+    font-size: 14px;
+    color: #666;
+}
+
+@media (max-width: 600px) {
+    #analytics-summary-content > div > div {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -445,13 +474,34 @@
 
         <!-- Analytics Tab -->
         <div id="analytics-tab" class="tab-content">
-            <div class="section">
-                <div class="section-header">Аналитика</div>
-                <div style="padding: 20px; text-align: center; color: #666;">
-                    Раздел в разработке
-                </div>
+    <div class="section" style="margin-bottom: 15px;">
+        <div class="section-header">Период анализа</div>
+        <div style="padding: 15px 20px;">
+            <div class="form-group" style="margin-bottom: 10px;">
+                <select id="analytics-period" class="form-select" onchange="updateAnalytics()">
+                    <option value="current-month">Текущий месяц</option>
+                    <option value="last-month">Прошлый месяц</option>
+                    <option value="all-time">За все время</option>
+                </select>
             </div>
         </div>
+    </div>
+
+    <div id="analytics-summary" class="section" style="margin-bottom: 15px;">
+        <div class="section-header">Сводка</div>
+        <div id="analytics-summary-content"></div>
+    </div>
+
+    <div id="analytics-income-categories" class="section" style="margin-bottom: 15px;">
+        <div class="section-header">Доходы по категориям</div>
+        <div id="income-categories-content"></div>
+    </div>
+
+    <div id="analytics-expense-categories" class="section">
+        <div class="section-header">Расходы по категориям</div>
+        <div id="expense-categories-content"></div>
+    </div>
+</div>
 
         <!-- Categories Tab -->
         <div id="categories-tab" class="tab-content">
@@ -836,7 +886,7 @@
 <!-- Execute Linked Expense Modal -->
 <div id="execute-linked-expense-modal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">Выполнить расход из дохода</div>
+        <div class="modal-header">Выполнить привязанный расход</div>
         <div id="execute-linked-expense-info"></div>
         <div class="form-group">
             <label class="form-label">Счет списания</label>
@@ -1119,6 +1169,166 @@ function updateRequiredExpensesList() {
     `).join('');
 }
 
+function updateAnalytics() {
+    const period = document.getElementById('analytics-period').value;
+    const transactions = getTransactionsForPeriod(period);
+    
+    updateAnalyticsSummary(transactions);
+    updateIncomeByCategories(transactions);
+    updateExpensesByCategories(transactions);
+}
+
+function getTransactionsForPeriod(period) {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    return data.completedTransactions.filter(transaction => {
+        const transactionDate = new Date(transaction.date);
+        const transactionMonth = transactionDate.getMonth();
+        const transactionYear = transactionDate.getFullYear();
+        
+        switch (period) {
+            case 'current-month':
+                return transactionMonth === currentMonth && transactionYear === currentYear;
+            case 'last-month':
+                const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+                const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+                return transactionMonth === lastMonth && transactionYear === lastMonthYear;
+            case 'all-time':
+            default:
+                return true;
+        }
+    });
+}
+
+function updateAnalyticsSummary(transactions) {
+    const incomes = transactions.filter(t => t.type === 'income');
+    const expenses = transactions.filter(t => t.type === 'expense');
+    
+    const totalIncome = incomes.reduce((sum, t) => sum + t.amount, 0);
+    const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0);
+    const balance = totalIncome - totalExpense;
+    
+    const container = document.getElementById('analytics-summary-content');
+    container.innerHTML = `
+        <div style="padding: 15px 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Доходы</div>
+                    <div style="font-size: 20px; font-weight: bold; color: #28a745;">+${formatCurrency(totalIncome)}</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Расходы</div>
+                    <div style="font-size: 20px; font-weight: bold; color: #dc3545;">-${formatCurrency(totalExpense)}</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Баланс</div>
+                    <div style="font-size: 20px; font-weight: bold; color: ${balance >= 0 ? '#28a745' : '#dc3545'};">
+                        ${balance >= 0 ? '+' : ''}${formatCurrency(balance)}
+                    </div>
+                </div>
+            </div>
+            <div style="font-size: 12px; color: #666; text-align: center;">
+                Операций: ${transactions.length} (${incomes.length} доходов, ${expenses.length} расходов)
+            </div>
+        </div>
+    `;
+}
+
+function updateIncomeByCategories(transactions) {
+    const incomes = transactions.filter(t => t.type === 'income');
+    const categoriesMap = {};
+    
+    incomes.forEach(transaction => {
+        const category = transaction.category || 'Без категории';
+        categoriesMap[category] = (categoriesMap[category] || 0) + transaction.amount;
+    });
+    
+    const categories = Object.entries(categoriesMap)
+        .sort((a, b) => b[1] - a[1]);
+    
+    const totalIncome = incomes.reduce((sum, t) => sum + t.amount, 0);
+    
+    const container = document.getElementById('income-categories-content');
+    
+    if (categories.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Нет доходов за выбранный период</div>';
+        return;
+    }
+    
+    container.innerHTML = categories.map(([category, amount]) => {
+        const percentage = totalIncome > 0 ? Math.round((amount / totalIncome) * 100) : 0;
+        return `
+            <div class="item">
+                <div class="item-info">
+                    <div class="item-name">${category}</div>
+                    <div class="item-details">${percentage}% от общего дохода</div>
+                    <div style="background: #28a745; height: 4px; border-radius: 2px; width: ${percentage}%; margin-top: 5px;"></div>
+                </div>
+                <div class="item-amount positive">+${formatCurrency(amount)}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateExpensesByCategories(transactions) {
+    const expenses = transactions.filter(t => t.type === 'expense');
+    const categoriesMap = {};
+    
+    expenses.forEach(transaction => {
+        const category = transaction.category || 'Без категории';
+        categoriesMap[category] = (categoriesMap[category] || 0) + transaction.amount;
+    });
+    
+    const categories = Object.entries(categoriesMap)
+        .sort((a, b) => b[1] - a[1]);
+    
+    const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0);
+    
+    const container = document.getElementById('expense-categories-content');
+    
+    if (categories.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Нет расходов за выбранный период</div>';
+        return;
+    }
+    
+    container.innerHTML = categories.map(([category, amount]) => {
+        const percentage = totalExpense > 0 ? Math.round((amount / totalExpense) * 100) : 0;
+        return `
+            <div class="item">
+                <div class="item-info">
+                    <div class="item-name">${category}</div>
+                    <div class="item-details">${percentage}% от общих расходов</div>
+                    <div style="background: #dc3545; height: 4px; border-radius: 2px; width: ${percentage}%; margin-top: 5px;"></div>
+                </div>
+                <div class="item-amount negative">-${formatCurrency(amount)}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function getPeriodDisplayName(period) {
+    const now = new Date();
+    const monthNames = [
+        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+    ];
+    
+    switch (period) {
+        case 'current-month':
+            return `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+        case 'last-month':
+            const lastMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
+            const lastMonthYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+            return `${monthNames[lastMonth]} ${lastMonthYear}`;
+        case 'all-time':
+            return 'За все время';
+        default:
+            return period;
+    }
+}
+
 function updateOptionalExpensesList() {
     const container = document.getElementById('optional-expenses-list');
     const expenses = data.plannedExpenses.filter(exp => !exp.linkedToIncomeId && !exp.isRequired);
@@ -1190,6 +1400,11 @@ function handleEditLinkedExpense(e) {
         
         saveData();
         updateUI();
+
+// Обновить аналитику при переходе на вкладку
+if (tabName === 'analytics') {
+    updateAnalytics();
+}
     }
     
     closeModal('edit-linked-expense-modal');
@@ -1204,13 +1419,13 @@ function executeLinkedExpense(expenseId, incomeId) {
     currentExecutingLinkedExpenseIncomeId = incomeId;
     
     document.getElementById('execute-linked-expense-info').innerHTML = `
-        <div style="margin-bottom: 15px;">
-            <strong>${expense.name}</strong><br>
-            ${expense.category}<br>
-            ${formatCurrency(expense.amount)}<br>
-            <small style="color: #666;">Будет списан из привязанного дохода</small>
-        </div>
-    `;
+    <div style="margin-bottom: 15px;">
+        <strong>${expense.name}</strong><br>
+        ${expense.category}<br>
+        ${formatCurrency(expense.amount)}<br>
+        <small style="color: #666;">Расход будет списан с выбранного счета. После выполнения он больше не будет учитываться в планировании дохода.</small>
+    </div>
+`;
     
     openModal('execute-linked-expense-modal');
 }
@@ -1237,15 +1452,16 @@ function confirmExecuteLinkedExpense() {
     account.balance -= expense.amount;
     
     // Добавить в историю
-    data.completedTransactions.push({
-        id: generateId(),
-        name: `${expense.name} (из дохода: ${income ? income.name : 'Удаленный доход'})`,
-        category: expense.category,
-        amount: expense.amount,
-        date: new Date().toISOString().split('T')[0],
-        type: 'expense',
-        accountName: account.name
-    });
+    // Добавить в историю
+data.completedTransactions.push({
+    id: generateId(),
+    name: expense.name,
+    category: expense.category,
+    amount: expense.amount,
+    date: new Date().toISOString().split('T')[0],
+    type: 'expense',
+    accountName: account.name
+});
     
     // Удалить выполненный расход
     data.plannedExpenses = data.plannedExpenses.filter(exp => exp.id !== currentExecutingLinkedExpenseId);
