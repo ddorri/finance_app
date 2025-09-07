@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ð¤Ð¸Ð½Ð°Ð½ÑÐ¾Ð²Ñ‹Ð¹ Ð¢Ñ€ÐµÐºÐµÑ€</title>
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRmluYW5jZSBUcmFja2VyIiwic2hvcnRfbmFtZSI6IkZpblRyYWNrZXIiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzAwN2ZmZiIsInRoZW1lX2NvbG9yIjoiIzAwN2ZmZiIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUIzYVdSMGFEMGlOVEV5SWlCb1pXbG5hSFE5SWpVeE1pSWdkbWxsZDBKdmVEMGlNQ0F3SURVeE1pQTFNVElpUGp4eVpXTjBJSGRwWkhSb1BTSTFNVElpSUdobGFXZG9kRDBpTlRFeUlpQm1hV3hzUFNJak1EQTNabVptSWk4K1BIUmxlSFFnZUQwaU1qVTJJaUI1UFNJeU56QWlJSFJsZUhRdFlXNWphRzl5UFNKdGFXUmtiR1VpSUdacGJHdzlJaU0zWm1abUlpNDJOandpUGpFOEwzUmxlSFErUEM5emRtYysifQ==">
+    <title>Финансовый Трекер</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#007fff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FinTracker">
+    
     <style>
         * {
             margin: 0;
@@ -103,6 +108,23 @@
             background: #f8f9fa;
             font-weight: bold;
             border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .clear-data-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .clear-data-btn:hover {
+            background: #c82333;
         }
 
         .item {
@@ -355,35 +377,36 @@
             font-size: 14px;
             color: #666;
         }
+        
         .progress-bar {
-    height: 4px;
-    border-radius: 2px;
-    margin-top: 5px;
-    transition: width 0.3s ease;
-}
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 5px;
+            transition: width 0.3s ease;
+        }
 
-.analytics-metric {
-    text-align: center;
-    padding: 10px;
-}
+        .analytics-metric {
+            text-align: center;
+            padding: 10px;
+        }
 
-.analytics-metric-value {
-    font-size: 20px;
-    font-weight: bold;
-    margin: 5px 0;
-}
+        .analytics-metric-value {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
 
-.analytics-metric-label {
-    font-size: 14px;
-    color: #666;
-}
+        .analytics-metric-label {
+            font-size: 14px;
+            color: #666;
+        }
 
-@media (max-width: 600px) {
-    #analytics-summary-content > div > div {
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
-    }
-}
+        @media (max-width: 600px) {
+            #analytics-summary-content > div > div {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -393,511 +416,114 @@
             <!-- Metrics -->
             <div class="metrics">
                 <div class="metric-card" id="total-metric">
-                    <div class="metric-title">Ð’ÑÐµÐ³Ð¾ Ð´ÐµÐ½ÐµÐ³</div>
-                    <div class="metric-value" id="total-amount">0â‚½</div>
+                    <div class="metric-title">Всего денег</div>
+                    <div class="metric-value" id="total-amount">0₽</div>
                     <div class="metric-details" id="total-details"></div>
                 </div>
                 <div class="metric-card" id="planned-metric">
-                    <div class="metric-title">ÐŸÐ»Ð°Ð½Ð¸Ñ€ÑƒÐµÑ‚ÑÑ</div>
-                    <div class="metric-value" id="planned-amount">0â‚½</div>
+                    <div class="metric-title">Планируется</div>
+                    <div class="metric-value" id="planned-amount">0₽</div>
                     <div class="metric-details" id="planned-details"></div>
                 </div>
                 <div class="metric-card">
-                    <div class="metric-title">Ð¡Ð²Ð¾Ð±Ð¾Ð´Ð½Ð¾</div>
-                    <div class="metric-value" id="free-amount">0â‚½</div>
+                    <div class="metric-title">Свободно</div>
+                    <div class="metric-value" id="free-amount">0₽</div>
+                </div>
+            </div>
+
+            <!-- Clear Data Button -->
+            <div class="section">
+                <div class="section-header">
+                    Управление данными
+                    <button class="clear-data-btn" onclick="clearAllData()">Очистить все данные</button>
+                </div>
+                <div class="item">
+                    <div class="item-info">
+                        <div class="item-name">Сброс данных</div>
+                        <div class="item-details">Удалить все счета, транзакции, планы и категории</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <button class="action-btn" onclick="openModal('expense-modal')">Ð Ð°ÑÑ…Ð¾Ð´</button>
-                <button class="action-btn" onclick="openModal('planned-expense-modal')">Ð—Ð°Ð¿Ð»Ð°Ð½Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ñ€Ð°ÑÑ…Ð¾Ð´</button>
-                <button class="action-btn" onclick="openModal('income-modal')">Ð”Ð¾Ñ…Ð¾Ð´</button>
-                <button class="action-btn" onclick="openModal('planned-income-modal')">Ð—Ð°Ð¿Ð»Ð°Ð½Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð´Ð¾Ñ…Ð¾Ð´</button>
+                <button class="action-btn" onclick="openModal('expense-modal')">Расход</button>
+                <button class="action-btn" onclick="openModal('planned-expense-modal')">Запланировать расход</button>
+                <button class="action-btn" onclick="openModal('income-modal')">Доход</button>
+                <button class="action-btn" onclick="openModal('planned-income-modal')">Запланировать доход</button>
             </div>
 
             <!-- Planned Expenses -->
-            <!-- Planned Expenses -->
-<div class="section">
-    <div class="section-header">ÐžÐ±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ðµ Ñ€Ð°ÑÑ…Ð¾Ð´Ñ‹</div>
-    <div id="required-expenses-list"></div>
-</div>
+            <div class="section">
+                <div class="section-header">Обязательные расходы</div>
+                <div id="required-expenses-list"></div>
+            </div>
 
-<div class="section">
-    <div class="section-header">ÐÐµÐ¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ðµ Ñ€Ð°ÑÑ…Ð¾Ð´Ñ‹</div>
-    <div id="optional-expenses-list"></div>
-</div>
+            <div class="section">
+                <div class="section-header">Необязательные расходы</div>
+                <div id="optional-expenses-list"></div>
+            </div>
 
             <!-- Planned Incomes -->
             <div class="section">
-                <div class="section-header">ÐŸÐ»Ð°Ð½Ð¸Ñ€ÑƒÐµÐ¼Ñ‹Ðµ Ð´Ð¾Ñ…Ð¾Ð´Ñ‹</div>
+                <div class="section-header">Планируемые доходы</div>
                 <div id="planned-incomes-list"></div>
             </div>
         </div>
 
-        <!-- Accounts Tab -->
+        <!-- Остальные табы остаются прежними -->
         <div id="accounts-tab" class="tab-content">
             <div class="account-group">
-                <div class="account-group-title">Ð Ð°ÑÑ‡ÐµÑ‚Ð½Ñ‹Ðµ ÑÑ‡ÐµÑ‚Ð°</div>
+                <div class="account-group-title">Расчетные счета</div>
                 <div class="section">
                     <div id="checking-accounts-list"></div>
                 </div>
             </div>
-
-            <div class="account-group">
-                <div class="account-group-title">Ð¡Ð±ÐµÑ€ÐµÐ³Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ðµ ÑÑ‡ÐµÑ‚Ð°</div>
-                <div class="section">
-                    <div id="savings-accounts-list"></div>
-                </div>
-            </div>
-
-            <div class="account-group">
-                <div class="account-group-title">Ð¡Ð±ÐµÑ€ÐµÐ³Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ðµ Ñ Ð»Ð¸Ð¼Ð¸Ñ‚Ð¾Ð¼</div>
-                <div class="section">
-                    <div id="limit-accounts-list"></div>
-                </div>
-            </div>
-
-            <div class="transfer-section">
-                <button class="btn btn-primary" onclick="openModal('transfer-modal')">ÐŸÐµÑ€ÐµÐ²ÐµÑÑ‚Ð¸ Ð´ÐµÐ½ÑŒÐ³Ð¸</button>
-                <button class="btn btn-secondary" onclick="openModal('add-account-modal')">Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ÑÑ‡ÐµÑ‚</button>
-            </div>
         </div>
 
-        <!-- History Tab -->
         <div id="history-tab" class="tab-content">
             <div class="section">
-                <div class="section-header">Ð˜ÑÑ‚Ð¾Ñ€Ð¸Ñ Ð¾Ð¿ÐµÑ€Ð°Ñ†Ð¸Ð¹</div>
+                <div class="section-header">История операций</div>
                 <div id="history-list"></div>
             </div>
         </div>
 
-        <!-- Analytics Tab -->
         <div id="analytics-tab" class="tab-content">
-    <div class="section" style="margin-bottom: 15px;">
-        <div class="section-header">ÐŸÐµÑ€Ð¸Ð¾Ð´ Ð°Ð½Ð°Ð»Ð¸Ð·Ð°</div>
-        <div style="padding: 15px 20px;">
-            <div class="form-group" style="margin-bottom: 10px;">
-                <select id="analytics-period" class="form-select" onchange="updateAnalytics()">
-                    <option value="current-month">Ð¢ÐµÐºÑƒÑ‰Ð¸Ð¹ Ð¼ÐµÑÑÑ†</option>
-                    <option value="last-month">ÐŸÑ€Ð¾ÑˆÐ»Ñ‹Ð¹ Ð¼ÐµÑÑÑ†</option>
-                    <option value="all-time">Ð—Ð° Ð²ÑÐµ Ð²Ñ€ÐµÐ¼Ñ</option>
-                </select>
+            <div class="section">
+                <div class="section-header">Аналитика</div>
+                <div id="analytics-summary-content"></div>
             </div>
         </div>
-    </div>
 
-    <div id="analytics-summary" class="section" style="margin-bottom: 15px;">
-        <div class="section-header">Ð¡Ð²Ð¾Ð´ÐºÐ°</div>
-        <div id="analytics-summary-content"></div>
-    </div>
-
-    <div id="analytics-income-categories" class="section" style="margin-bottom: 15px;">
-        <div class="section-header">Ð”Ð¾Ñ…Ð¾Ð´Ñ‹ Ð¿Ð¾ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑÐ¼</div>
-        <div id="income-categories-content"></div>
-    </div>
-
-    <div id="analytics-expense-categories" class="section">
-        <div class="section-header">Ð Ð°ÑÑ…Ð¾Ð´Ñ‹ Ð¿Ð¾ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑÐ¼</div>
-        <div id="expense-categories-content"></div>
-    </div>
-</div>
-
-        <!-- Categories Tab -->
         <div id="categories-tab" class="tab-content">
-    <div id="categories-list"></div>
-</div>
+            <div id="categories-list"></div>
+        </div>
     </div>
 
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
         <button class="nav-item active" onclick="switchTab('dashboard')">
-            <span class="nav-icon">ðŸ“Š</span>
-            Ð“Ð»Ð°Ð²Ð½Ð°Ñ
+            <span class="nav-icon">📊</span>
+            Главная
         </button>
         <button class="nav-item" onclick="switchTab('accounts')">
-            <span class="nav-icon">ðŸ’³</span>
-            Ð¡Ñ‡ÐµÑ‚Ð°
+            <span class="nav-icon">💳</span>
+            Счета
         </button>
         <button class="nav-item" onclick="switchTab('history')">
-            <span class="nav-icon">ðŸ“œ</span>
-            Ð˜ÑÑ‚Ð¾Ñ€Ð¸Ñ
+            <span class="nav-icon">📜</span>
+            История
         </button>
         <button class="nav-item" onclick="switchTab('analytics')">
-            <span class="nav-icon">ðŸ“ˆ</span>
-            ÐÐ½Ð°Ð»Ð¸Ñ‚Ð¸ÐºÐ°
+            <span class="nav-icon">📈</span>
+            Аналитика
         </button>
         <button class="nav-item" onclick="switchTab('categories')">
-            <span class="nav-icon">ðŸ·ï¸</span>
-            ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸
+            <span class="nav-icon">🏷️</span>
+            Категории
         </button>
     </div>
 
-    <!-- Modals -->
-    <!-- Add Account Modal -->
-    <div id="add-account-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ÑÑ‡ÐµÑ‚</div>
-            <form id="add-account-form">
-                <div class="form-group">
-                    <label class="form-label">ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ</label>
-                    <input type="text" class="form-input" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">ÐÐ°Ñ‡Ð°Ð»ÑŒÐ½Ð°Ñ ÑÑƒÐ¼Ð¼Ð°</label>
-                    <input type="number" class="form-input" name="balance" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ð¢Ð¸Ð¿ ÑÑ‡ÐµÑ‚Ð°</label>
-                    <select class="form-select" name="type" required>
-                        <option value="checking">Ð Ð°ÑÑ‡ÐµÑ‚Ð½Ñ‹Ð¹</option>
-                        <option value="savings">Ð¡Ð±ÐµÑ€ÐµÐ³Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹</option>
-                        <option value="savings-limit">Ð¡Ð±ÐµÑ€ÐµÐ³Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ Ñ Ð»Ð¸Ð¼Ð¸Ñ‚Ð¾Ð¼</option>
-                    </select>
-                </div>
-                <div class="form-group" id="limit-group" style="display: none;">
-                    <label class="form-label">Ð¦ÐµÐ»ÐµÐ²Ð°Ñ ÑÑƒÐ¼Ð¼Ð°</label>
-                    <input type="number" class="form-input" name="targetAmount">
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('add-account-modal')">ÐžÑ‚Ð¼ÐµÐ½Ð°</button>
-                    <button type="submit" class="btn btn-primary">Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Transfer Modal -->
-    <div id="transfer-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">ÐŸÐµÑ€ÐµÐ²Ð¾Ð´ Ð´ÐµÐ½ÐµÐ³</div>
-            <form id="transfer-form">
-                <div class="form-group">
-                    <label class="form-label">ÐžÑ‚ÐºÑƒÐ´Ð°</label>
-                    <select class="form-select" name="fromAccount" required id="transfer-from"></select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">ÐšÑƒÐ´Ð°</label>
-                    <select class="form-select" name="toAccount" required id="transfer-to"></select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ð¡ÑƒÐ¼Ð¼Ð°</label>
-                    <input type="number" class="form-input" name="amount" required>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('transfer-modal')">ÐžÑ‚Ð¼ÐµÐ½Ð°</button>
-                    <button type="submit" class="btn btn-primary">ÐŸÐµÑ€ÐµÐ²ÐµÑÑ‚Ð¸</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Expense Modal -->
-    <div id="expense-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ñ€Ð°ÑÑ…Ð¾Ð´</div>
-            <form id="expense-form">
-                <div class="form-group">
-                    <label class="form-label">ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ</label>
-                    <input type="text" class="form-input" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ñ</label>
-                    <select class="form-select" name="category" required>
-    <option value="">Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑŽ</option>
-    <!-- Ð—Ð´ÐµÑÑŒ Ð±ÑƒÐ´ÑƒÑ‚ Ð¿Ð¾Ð´Ñ‚ÑÐ³Ð¸Ð²Ð°Ñ‚ÑŒÑÑ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸ -->
-</select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ð¡ÑƒÐ¼Ð¼Ð°</label>
-                    <input type="number" class="form-input" name="amount" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ð¡Ñ‡ÐµÑ‚ ÑÐ¿Ð¸ÑÐ°Ð½Ð¸Ñ</label>
-                    <select class="form-select" name="account" required id="expense-account"></select>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('expense-modal')">ÐžÑ‚Ð¼ÐµÐ½Ð°</button>
-                    <button type="submit" class="btn btn-primary">Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Planned Expense Modal -->
-    <div id="planned-expense-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">Ð—Ð°Ð¿Ð»Ð°Ð½Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ñ€Ð°ÑÑ…Ð¾Ð´</div>
-            <form id="planned-expense-form">
-                <div class="form-group">
-                    <label class="form-label">ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ</label>
-                    <input type="text" class="form-input" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ñ</label>
-                    <select class="form-select" name="category" required>
-    <option value="">Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑŽ</option>
-    <!-- Ð—Ð´ÐµÑÑŒ Ð±ÑƒÐ´ÑƒÑ‚ Ð¿Ð¾Ð´Ñ‚ÑÐ³Ð¸Ð²Ð°Ñ‚ÑŒÑÑ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸ -->
-</select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ð¡ÑƒÐ¼Ð¼Ð°</label>
-                    <input type="number" class="form-input" name="amount" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">ÐŸÐ»Ð°Ð½Ð¸Ñ€ÑƒÐµÐ¼Ð°Ñ Ð´Ð°Ñ‚Ð°</label>
-                    <input type="date" class="form-input" name="plannedDate">
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" class="form-checkbox" name="isRequired">
-                        ÐžÐ±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ Ñ€Ð°ÑÑ…Ð¾Ð´
-                    </label>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('planned-expense-modal')">ÐžÑ‚Ð¼ÐµÐ½Ð°</button>
-                    <button type="submit" class="btn btn-primary">Ð—Ð°Ð¿Ð»Ð°Ð½Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Income Modal -->
-    <div id="income-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð´Ð¾Ñ…Ð¾Ð´</div>
-            <form id="income-form">
-                <div class="form-group">
-                    <label class="form-label">ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ</label>
-                    <input type="text" class="form-input" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ñ</label>
-                    <select class="form-select" name="category" required>
-    <option value="">Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑŽ</option>
-    <!-- Ð—Ð´ÐµÑÑŒ Ð±ÑƒÐ´ÑƒÑ‚ Ð¿Ð¾Ð´Ñ‚ÑÐ³Ð¸Ð²Ð°Ñ‚ÑŒÑÑ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸ -->
-</select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ð¡ÑƒÐ¼Ð¼Ð°</label>
-                    <input type="number" class="form-input" name="amount" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ð¡Ñ‡ÐµÑ‚ Ð¿Ð¾ÑÑ‚ÑƒÐ¿Ð»ÐµÐ½Ð¸Ñ</label>
-                    <select class="form-select" name="account" required id="income-account"></select>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('income-modal')">ÐžÑ‚Ð¼ÐµÐ½Ð°</button>
-                    <button type="submit" class="btn btn-primary">Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Planned Income Modal -->
-    <div id="planned-income-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">Ð—Ð°Ð¿Ð»Ð°Ð½Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð´Ð¾Ñ…Ð¾Ð´</div>
-            <form id="planned-income-form">
-                <div class="form-group">
-                    <label class="form-label">ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ</label>
-                    <input type="text" class="form-input" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ñ</label>
-                    <select class="form-select" name="category" required>
-    <option value="">Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑŽ</option>
-    <!-- Ð—Ð´ÐµÑÑŒ Ð±ÑƒÐ´ÑƒÑ‚ Ð¿Ð¾Ð´Ñ‚ÑÐ³Ð¸Ð²Ð°Ñ‚ÑŒÑÑ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸ -->
-</select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ð¡ÑƒÐ¼Ð¼Ð°</label>
-                    <input type="number" class="form-input" name="amount" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">ÐŸÐ»Ð°Ð½Ð¸Ñ€ÑƒÐµÐ¼Ð°Ñ Ð´Ð°Ñ‚Ð°</label>
-                    <input type="date" class="form-input" name="plannedDate">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ð¡Ñ‡ÐµÑ‚ Ð¿Ð¾ÑÑ‚ÑƒÐ¿Ð»ÐµÐ½Ð¸Ñ (Ð¾Ð¿Ñ†Ð¸Ð¾Ð½Ð°Ð»ÑŒÐ½Ð¾)</label>
-                    <select class="form-select" name="account" id="planned-income-account">
-                        <option value="">Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÑÑ‡ÐµÑ‚</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('planned-income-modal')">ÐžÑ‚Ð¼ÐµÐ½Ð°</button>
-                    <button type="submit" class="btn btn-primary">Ð—Ð°Ð¿Ð»Ð°Ð½Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Execute Income Modal -->
-    <div id="execute-income-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">Ð’Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ Ð´Ð¾Ñ…Ð¾Ð´</div>
-            <div id="execute-income-info"></div>
-            <div class="form-group">
-                <label class="form-label">Ð¡Ñ‡ÐµÑ‚ Ð¿Ð¾ÑÑ‚ÑƒÐ¿Ð»ÐµÐ½Ð¸Ñ</label>
-                <select class="form-select" id="execute-income-account" required></select>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('execute-income-modal')">ÐžÑ‚Ð¼ÐµÐ½Ð°</button>
-                <button type="button" class="btn btn-primary" onclick="confirmExecuteIncome()">Ð’Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Execute Expense Modal -->
-    <div id="execute-expense-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">Ð’Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ Ñ€Ð°ÑÑ…Ð¾Ð´</div>
-            <div id="execute-expense-info"></div>
-            <div class="form-group">
-                <label class="form-label">Ð¡Ñ‡ÐµÑ‚ ÑÐ¿Ð¸ÑÐ°Ð½Ð¸Ñ</label>
-                <select class="form-select" id="execute-expense-account" required></select>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('execute-expense-modal')">ÐžÑ‚Ð¼ÐµÐ½Ð°</button>
-                <button type="button" class="btn btn-primary" onclick="confirmExecuteExpense()">Ð’Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Income Modal -->
-    <div id="edit-income-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">Ð˜Ð·Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ Ð´Ð¾Ñ…Ð¾Ð´</div>
-            <form id="edit-income-form">
-                <div class="form-group">
-                    <label class="form-label">ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ</label>
-                    <input type="text" class="form-input" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ñ</label>
-                    <select class="form-select" name="category" required>
-    <option value="">Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑŽ</option>
-    <!-- Ð—Ð´ÐµÑÑŒ Ð±ÑƒÐ´ÑƒÑ‚ Ð¿Ð¾Ð´Ñ‚ÑÐ³Ð¸Ð²Ð°Ñ‚ÑŒÑÑ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸ -->
-</select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ð¡ÑƒÐ¼Ð¼Ð°</label>
-                    <input type="number" class="form-input" name="amount" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">ÐŸÐ»Ð°Ð½Ð¸Ñ€ÑƒÐµÐ¼Ð°Ñ Ð´Ð°Ñ‚Ð°</label>
-                    <input type="date" class="form-input" name="plannedDate">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ð¡Ñ‡ÐµÑ‚ Ð¿Ð¾ÑÑ‚ÑƒÐ¿Ð»ÐµÐ½Ð¸Ñ</label>
-                    <select class="form-select" name="account" id="edit-income-account">
-                        <option value="">Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÑÑ‡ÐµÑ‚</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('edit-income-modal')">ÐžÑ‚Ð¼ÐµÐ½Ð°</button>
-                    <button type="submit" class="btn btn-primary">Ð¡Ð¾Ñ…Ñ€Ð°Ð½Ð¸Ñ‚ÑŒ</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Linked Expense Modal -->
-    <div id="add-linked-expense-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ñ€Ð°ÑÑ…Ð¾Ð´ Ðº Ð´Ð¾Ñ…Ð¾Ð´Ñƒ</div>
-            <form id="add-linked-expense-form">
-                <div class="form-group">
-                    <label class="form-label">ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ</label>
-                    <input type="text" class="form-input" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ñ</label>
-                    <select class="form-select" name="category" required>
-    <option value="">Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑŽ</option>
-    
-    <!-- Ð—Ð´ÐµÑÑŒ Ð±ÑƒÐ´ÑƒÑ‚ Ð¿Ð¾Ð´Ñ‚ÑÐ³Ð¸Ð²Ð°Ñ‚ÑŒÑÑ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸ -->
-</select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ð¡ÑƒÐ¼Ð¼Ð°</label>
-                    <input type="number" class="form-input" name="amount" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Ð”Ð°Ñ‚Ð° (Ð¾Ð¿Ñ†Ð¸Ð¾Ð½Ð°Ð»ÑŒÐ½Ð¾)</label>
-                    <input type="date" class="form-input" name="plannedDate">
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('add-linked-expense-modal')">ÐžÑ‚Ð¼ÐµÐ½Ð°</button>
-                    <button type="submit" class="btn btn-primary">Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ</button>
-                </div>
-            </form>
-        </div>
-    </div>
-<!-- Edit Account Modal -->
-<div id="edit-account-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">Ð˜Ð·Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ ÑÑ‡ÐµÑ‚</div>
-        <form id="edit-account-form">
-            <div class="form-group">
-                <label class="form-label">ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ</label>
-                <input type="text" class="form-input" name="name" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Ð‘Ð°Ð»Ð°Ð½Ñ</label>
-                <input type="number" class="form-input" name="balance" required>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('edit-account-modal')">ÐžÑ‚Ð¼ÐµÐ½Ð°</button>
-                <button type="submit" class="btn btn-primary">Ð¡Ð¾Ñ…Ñ€Ð°Ð½Ð¸Ñ‚ÑŒ</button>
-            </div>
-        </form>
-    </div>
-</div>
-<!-- Edit Linked Expense Modal -->
-<div id="edit-linked-expense-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">Ð˜Ð·Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ Ñ€Ð°ÑÑ…Ð¾Ð´</div>
-        <form id="edit-linked-expense-form">
-            <div class="form-group">
-                <label class="form-label">ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ</label>
-                <input type="text" class="form-input" name="name" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ñ</label>
-                <select class="form-select" name="category" required></select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Ð¡ÑƒÐ¼Ð¼Ð°</label>
-                <input type="number" class="form-input" name="amount" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Ð”Ð°Ñ‚Ð° (Ð¾Ð¿Ñ†Ð¸Ð¾Ð½Ð°Ð»ÑŒÐ½Ð¾)</label>
-                <input type="date" class="form-input" name="plannedDate">
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('edit-linked-expense-modal')">ÐžÑ‚Ð¼ÐµÐ½Ð°</button>
-                <button type="submit" class="btn btn-primary">Ð¡Ð¾Ñ…Ñ€Ð°Ð½Ð¸Ñ‚ÑŒ</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Execute Linked Expense Modal -->
-<div id="execute-linked-expense-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">Ð’Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ Ð¿Ñ€Ð¸Ð²ÑÐ·Ð°Ð½Ð½Ñ‹Ð¹ Ñ€Ð°ÑÑ…Ð¾Ð´</div>
-        <div id="execute-linked-expense-info"></div>
-        <div class="form-group">
-            <label class="form-label">Ð¡Ñ‡ÐµÑ‚ ÑÐ¿Ð¸ÑÐ°Ð½Ð¸Ñ</label>
-            <select class="form-select" id="execute-linked-expense-account" required></select>
-        </div>
-        <div class="form-actions">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('execute-linked-expense-modal')">ÐžÑ‚Ð¼ÐµÐ½Ð°</button>
-            <button type="button" class="btn btn-primary" onclick="confirmExecuteLinkedExpense()">Ð’Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ</button>
-        </div>
-    </div>
-</div>
     <script>
         // Data structure
         let data = {
@@ -906,31 +532,22 @@
             plannedExpenses: [],
             completedTransactions: [],
             categories: {
-                income: ['Ð—Ð°Ñ€Ð¿Ð»Ð°Ñ‚Ð°', 'ÐŸÐ¾Ð´Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ°', 'Ð˜Ð½Ð²ÐµÑÑ‚Ð¸Ñ†Ð¸Ð¸', 'ÐŸÐ¾Ð´Ð°Ñ€ÐºÐ¸'],
-                expense: ['ÐŸÑ€Ð¾Ð´ÑƒÐºÑ‚Ñ‹', 'Ð¢Ñ€Ð°Ð½ÑÐ¿Ð¾Ñ€Ñ‚', 'Ð–ÐšÐ¥', 'Ð Ð°Ð·Ð²Ð»ÐµÑ‡ÐµÐ½Ð¸Ñ', 'ÐžÐ´ÐµÐ¶Ð´Ð°']
+                income: ['Зарплата', 'Подработка', 'Инвестиции', 'Подарки'],
+                expense: ['Продукты', 'Транспорт', 'ЖКХ', 'Развлечения', 'Одежда']
             }
-};
-
-        let currentEditingIncomeId = null;
-        let currentExecutingIncomeId = null;
-        let currentExecutingExpenseId = null;
-        let currentAddingExpenseToIncomeId = null;
-        let currentEditingLinkedExpenseId = null;
-let currentExecutingLinkedExpenseId = null;
-let currentExecutingLinkedExpenseIncomeId = null;
+        };
 
         // Initialize app
         function init() {
             loadData();
             updateUI();
             registerServiceWorker();
-            setupEventListeners();
             
             // Create default checking account if none exists
             if (data.accounts.filter(acc => acc.type === 'checking').length === 0) {
                 data.accounts.push({
                     id: generateId(),
-                    name: 'ÐžÑÐ½Ð¾Ð²Ð½Ð¾Ð¹ ÑÑ‡ÐµÑ‚',
+                    name: 'Основной счет',
                     balance: 0,
                     type: 'checking'
                 });
@@ -941,35 +558,47 @@ let currentExecutingLinkedExpenseIncomeId = null;
         // Service Worker registration
         function registerServiceWorker() {
             if ('serviceWorker' in navigator) {
-                const swCode = `
-                    const CACHE_NAME = 'finance-pwa-v1';
-                    const urlsToCache = [
-                        '/',
-                        '/index.html',
-                        'data:text/css;base64,' + btoa(document.querySelector('style').textContent)
-                    ];
-
-                    self.addEventListener('install', (event) => {
-                        event.waitUntil(
-                            caches.open(CACHE_NAME)
-                                .then((cache) => cache.addAll(urlsToCache))
-                        );
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then((registration) => {
+                        console.log('Service Worker зарегистрирован:', registration);
+                    })
+                    .catch((error) => {
+                        console.log('Ошибка регистрации Service Worker:', error);
                     });
+            }
+        }
 
-                    self.addEventListener('fetch', (event) => {
-                        event.respondWith(
-                            caches.match(event.request)
-                                .then((response) => {
-                                    return response || fetch(event.request);
-                                })
-                        );
+        // Clear all data function
+        function clearAllData() {
+            if (confirm('Вы уверены, что хотите удалить ВСЕ данные? Это действие нельзя отменить!')) {
+                if (confirm('ПОСЛЕДНЕЕ ПРЕДУПРЕЖДЕНИЕ! Все счета, транзакции и планы будут удалены навсегда!')) {
+                    // Очищаем localStorage
+                    localStorage.removeItem('financeData');
+                    
+                    // Сбрасываем данные в памяти
+                    data = {
+                        accounts: [],
+                        plannedIncomes: [],
+                        plannedExpenses: [],
+                        completedTransactions: [],
+                        categories: {
+                            income: ['Зарплата', 'Подработка', 'Инвестиции', 'Подарки'],
+                            expense: ['Продукты', 'Транспорт', 'ЖКХ', 'Развлечения', 'Одежда']
+                        }
+                    };
+                    
+                    // Создаем дефолтный счет
+                    data.accounts.push({
+                        id: generateId(),
+                        name: 'Основной счет',
+                        balance: 0,
+                        type: 'checking'
                     });
-                `;
-                
-                const blob = new Blob([swCode], { type: 'application/javascript' });
-                const swUrl = URL.createObjectURL(blob);
-                
-                navigator.serviceWorker.register(swUrl);
+                    
+                    saveData();
+                    updateUI();
+                    alert('Все данные успешно очищены!');
+                }
             }
         }
 
@@ -994,7 +623,7 @@ let currentExecutingLinkedExpenseIncomeId = null;
             return new Intl.NumberFormat('ru-RU', {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
-            }).format(amount) + 'â‚½';
+            }).format(amount) + '₽';
         }
 
         function formatDate(dateStr) {
@@ -1016,64 +645,20 @@ let currentExecutingLinkedExpenseIncomeId = null;
             event.target.closest('.nav-item').classList.add('active');
             
             updateUI();
-            
         }
-function updateCategorySelects(modalId) {
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
-    
-    const categorySelect = modal.querySelector('select[name="category"]');
-    if (!categorySelect) return;
-    
-    const isIncomeModal = modalId.includes('income');
-    const categories = isIncomeModal ? data.categories.income : data.categories.expense;
-    
-    categorySelect.innerHTML = '<option value="">Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑŽ</option>' +
-        categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-}
+
         function openModal(modalId) {
-    document.getElementById(modalId).classList.add('active');
-    updateAccountSelects();
-    updateCategorySelects(modalId); // â† Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ÑÑ‚Ñƒ ÑÑ‚Ñ€Ð¾ÐºÑƒ
-}
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-            // Reset forms
-            const form = document.querySelector(`#${modalId} form`);
-            if (form) form.reset();
-        }
-
-        function updateAccountSelects() {
-            const checkingAccounts = data.accounts.filter(acc => acc.type === 'checking');
-            const allAccounts = data.accounts;
-            
-            // Update all account selects
-            const selects = [
-                'expense-account', 'income-account', 'planned-income-account',
-                'edit-income-account', 'execute-income-account', 'execute-expense-account',
-                'transfer-from', 'transfer-to'
-            ];
-            
-            selects.forEach(selectId => {
-                const select = document.getElementById(selectId);
-                if (select) {
-                    const useAllAccounts = selectId.includes('transfer');
-                    const accounts = useAllAccounts ? allAccounts : checkingAccounts;
-                    
-                    select.innerHTML = '';
-                    if (selectId.includes('planned-income') || selectId.includes('edit-income')) {
-                        select.innerHTML = '<option value="">Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÑÑ‡ÐµÑ‚</option>';
-                    }
-                    
-                    accounts.forEach(account => {
-                        const option = document.createElement('option');
-                        option.value = account.id;
-                        option.textContent = `${account.name} (${formatCurrency(account.balance)})`;
-                        select.appendChild(option);
-                    });
-                }
-            });
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+            }
         }
 
         // Calculations
@@ -1081,7 +666,6 @@ function updateCategorySelects(modalId) {
             const checkingAccounts = data.accounts.filter(acc => acc.type === 'checking');
             const totalAmount = checkingAccounts.reduce((sum, acc) => sum + acc.balance, 0);
             
-            // Planned amount: sum of planned incomes minus their linked expenses
             let plannedAmount = 0;
             data.plannedIncomes.forEach(income => {
                 const linkedExpenses = data.plannedExpenses.filter(exp => exp.linkedToIncomeId === income.id);
@@ -1089,7 +673,6 @@ function updateCategorySelects(modalId) {
                 plannedAmount += income.amount - linkedExpensesSum;
             });
             
-            // Free amount: total - required expenses not linked to incomes
             const requiredExpenses = data.plannedExpenses.filter(exp => exp.isRequired && !exp.linkedToIncomeId);
             const requiredExpensesSum = requiredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
             const freeAmount = totalAmount - requiredExpensesSum;
@@ -1099,18 +682,13 @@ function updateCategorySelects(modalId) {
 
         // UI Updates
         function updateUI() {
-    updateMetrics();
-    updatePlannedExpensesList();
-    updatePlannedIncomesList();
-    updateAccountsList();
-    updateHistoryList();
-    updateCategoriesList();
-    
-    // ÐžÐ±Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð°Ð½Ð°Ð»Ð¸Ñ‚Ð¸ÐºÑƒ ÐµÑÐ»Ð¸ Ð²ÐºÐ»Ð°Ð´ÐºÐ° Ð°ÐºÑ‚Ð¸Ð²Ð½Ð°
-    if (document.getElementById('analytics-tab').classList.contains('active')) {
-        updateAnalytics();
-    }
-}
+            updateMetrics();
+            updatePlannedExpensesList();
+            updatePlannedIncomesList();
+            updateAccountsList();
+            updateHistoryList();
+            updateCategoriesList();
+        }
 
         function updateMetrics() {
             const { totalAmount, plannedAmount, freeAmount } = calculateMetrics();
@@ -1120,7 +698,6 @@ function updateCategorySelects(modalId) {
             document.getElementById('free-amount').textContent = formatCurrency(freeAmount);
             document.getElementById('free-amount').className = 'metric-value ' + (freeAmount >= 0 ? 'positive' : 'negative');
             
-            // Update details for expandable metrics
             updateTotalDetails();
             updatePlannedDetails();
         }
@@ -1144,380 +721,61 @@ function updateCategorySelects(modalId) {
         }
 
         function updatePlannedExpensesList() {
-    updateRequiredExpensesList();
-    updateOptionalExpensesList();
-}
-
-function updateRequiredExpensesList() {
-    const container = document.getElementById('required-expenses-list');
-    const expenses = data.plannedExpenses.filter(exp => !exp.linkedToIncomeId && exp.isRequired);
-    
-    if (expenses.length === 0) {
-        container.innerHTML = '<div class="item" style="text-align: center; color: #666;">ÐÐµÑ‚ Ð¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ñ… Ñ€Ð°ÑÑ…Ð¾Ð´Ð¾Ð²</div>';
-        return;
-    }
-    
-    container.innerHTML = expenses.map(expense => `
-        <div class="item">
-            <div class="item-info">
-                <div class="item-name">${expense.name}</div>
-                <div class="item-details">
-                    ${expense.category} â€¢ ${expense.plannedDate ? formatDate(expense.plannedDate) : 'Ð”Ð°Ñ‚Ð° Ð½Ðµ ÑƒÐºÐ°Ð·Ð°Ð½Ð°'}
-                </div>
-            </div>
-            <div class="item-amount">${formatCurrency(expense.amount)}</div>
-            <div class="item-actions">
-                <button class="icon-btn edit" onclick="editExpense('${expense.id}')" title="Ð˜Ð·Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ">âœï¸</button>
-                <button class="icon-btn complete" onclick="executeExpense('${expense.id}')" title="Ð’Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ">âœ…</button>
-                <button class="icon-btn delete" onclick="deleteExpense('${expense.id}')" title="Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ">ðŸ—‘ï¸</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function updateAnalytics() {
-    const period = document.getElementById('analytics-period').value;
-    const transactions = getTransactionsForPeriod(period);
-    
-    updateAnalyticsSummary(transactions);
-    updateIncomeByCategories(transactions);
-    updateExpensesByCategories(transactions);
-}
-
-function getTransactionsForPeriod(period) {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-    
-    return data.completedTransactions.filter(transaction => {
-        const transactionDate = new Date(transaction.date);
-        const transactionMonth = transactionDate.getMonth();
-        const transactionYear = transactionDate.getFullYear();
-        
-        switch (period) {
-            case 'current-month':
-                return transactionMonth === currentMonth && transactionYear === currentYear;
-            case 'last-month':
-                const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-                const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-                return transactionMonth === lastMonth && transactionYear === lastMonthYear;
-            case 'all-time':
-            default:
-                return true;
+            updateRequiredExpensesList();
+            updateOptionalExpensesList();
         }
-    });
-}
 
-function updateAnalyticsSummary(transactions) {
-    const incomes = transactions.filter(t => t.type === 'income');
-    const expenses = transactions.filter(t => t.type === 'expense');
-    
-    const totalIncome = incomes.reduce((sum, t) => sum + t.amount, 0);
-    const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0);
-    const balance = totalIncome - totalExpense;
-    
-    const container = document.getElementById('analytics-summary-content');
-    container.innerHTML = `
-        <div style="padding: 15px 20px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                <div style="text-align: center;">
-                    <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Ð”Ð¾Ñ…Ð¾Ð´Ñ‹</div>
-                    <div style="font-size: 20px; font-weight: bold; color: #28a745;">+${formatCurrency(totalIncome)}</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Ð Ð°ÑÑ…Ð¾Ð´Ñ‹</div>
-                    <div style="font-size: 20px; font-weight: bold; color: #dc3545;">-${formatCurrency(totalExpense)}</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Ð‘Ð°Ð»Ð°Ð½Ñ</div>
-                    <div style="font-size: 20px; font-weight: bold; color: ${balance >= 0 ? '#28a745' : '#dc3545'};">
-                        ${balance >= 0 ? '+' : ''}${formatCurrency(balance)}
+        function updateRequiredExpensesList() {
+            const container = document.getElementById('required-expenses-list');
+            const expenses = data.plannedExpenses.filter(exp => !exp.linkedToIncomeId && exp.isRequired);
+            
+            if (expenses.length === 0) {
+                container.innerHTML = '<div class="item" style="text-align: center; color: #666;">Нет обязательных расходов</div>';
+                return;
+            }
+            
+            container.innerHTML = expenses.map(expense => `
+                <div class="item">
+                    <div class="item-info">
+                        <div class="item-name">${expense.name}</div>
+                        <div class="item-details">
+                            ${expense.category} • ${expense.plannedDate ? formatDate(expense.plannedDate) : 'Дата не указана'}
+                        </div>
                     </div>
+                    <div class="item-amount">${formatCurrency(expense.amount)}</div>
                 </div>
-            </div>
-            <div style="font-size: 12px; color: #666; text-align: center;">
-                ÐžÐ¿ÐµÑ€Ð°Ñ†Ð¸Ð¹: ${transactions.length} (${incomes.length} Ð´Ð¾Ñ…Ð¾Ð´Ð¾Ð², ${expenses.length} Ñ€Ð°ÑÑ…Ð¾Ð´Ð¾Ð²)
-            </div>
-        </div>
-    `;
-}
+            `).join('');
+        }
 
-function updateIncomeByCategories(transactions) {
-    const incomes = transactions.filter(t => t.type === 'income');
-    const categoriesMap = {};
-    
-    incomes.forEach(transaction => {
-        const category = transaction.category || 'Ð‘ÐµÐ· ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸';
-        categoriesMap[category] = (categoriesMap[category] || 0) + transaction.amount;
-    });
-    
-    const categories = Object.entries(categoriesMap)
-        .sort((a, b) => b[1] - a[1]);
-    
-    const totalIncome = incomes.reduce((sum, t) => sum + t.amount, 0);
-    
-    const container = document.getElementById('income-categories-content');
-    
-    if (categories.length === 0) {
-        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">ÐÐµÑ‚ Ð´Ð¾Ñ…Ð¾Ð´Ð¾Ð² Ð·Ð° Ð²Ñ‹Ð±Ñ€Ð°Ð½Ð½Ñ‹Ð¹ Ð¿ÐµÑ€Ð¸Ð¾Ð´</div>';
-        return;
-    }
-    
-    container.innerHTML = categories.map(([category, amount]) => {
-        const percentage = totalIncome > 0 ? Math.round((amount / totalIncome) * 100) : 0;
-        return `
-            <div class="item">
-                <div class="item-info">
-                    <div class="item-name">${category}</div>
-                    <div class="item-details">${percentage}% Ð¾Ñ‚ Ð¾Ð±Ñ‰ÐµÐ³Ð¾ Ð´Ð¾Ñ…Ð¾Ð´Ð°</div>
-                    <div style="background: #28a745; height: 4px; border-radius: 2px; width: ${percentage}%; margin-top: 5px;"></div>
+        function updateOptionalExpensesList() {
+            const container = document.getElementById('optional-expenses-list');
+            const expenses = data.plannedExpenses.filter(exp => !exp.linkedToIncomeId && !exp.isRequired);
+            
+            if (expenses.length === 0) {
+                container.innerHTML = '<div class="item" style="text-align: center; color: #666;">Нет необязательных расходов</div>';
+                return;
+            }
+            
+            container.innerHTML = expenses.map(expense => `
+                <div class="item">
+                    <div class="item-info">
+                        <div class="item-name">${expense.name}</div>
+                        <div class="item-details">
+                            ${expense.category} • ${expense.plannedDate ? formatDate(expense.plannedDate) : 'Дата не указана'}
+                        </div>
+                    </div>
+                    <div class="item-amount">${formatCurrency(expense.amount)}</div>
                 </div>
-                <div class="item-amount positive">+${formatCurrency(amount)}</div>
-            </div>
-        `;
-    }).join('');
-}
+            `).join('');
+        }
 
-function updateExpensesByCategories(transactions) {
-    const expenses = transactions.filter(t => t.type === 'expense');
-    const categoriesMap = {};
-    
-    expenses.forEach(transaction => {
-        const category = transaction.category || 'Ð‘ÐµÐ· ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸';
-        categoriesMap[category] = (categoriesMap[category] || 0) + transaction.amount;
-    });
-    
-    const categories = Object.entries(categoriesMap)
-        .sort((a, b) => b[1] - a[1]);
-    
-    const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0);
-    
-    const container = document.getElementById('expense-categories-content');
-    
-    if (categories.length === 0) {
-        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">ÐÐµÑ‚ Ñ€Ð°ÑÑ…Ð¾Ð´Ð¾Ð² Ð·Ð° Ð²Ñ‹Ð±Ñ€Ð°Ð½Ð½Ñ‹Ð¹ Ð¿ÐµÑ€Ð¸Ð¾Ð´</div>';
-        return;
-    }
-    
-    container.innerHTML = categories.map(([category, amount]) => {
-        const percentage = totalExpense > 0 ? Math.round((amount / totalExpense) * 100) : 0;
-        return `
-            <div class="item">
-                <div class="item-info">
-                    <div class="item-name">${category}</div>
-                    <div class="item-details">${percentage}% Ð¾Ñ‚ Ð¾Ð±Ñ‰Ð¸Ñ… Ñ€Ð°ÑÑ…Ð¾Ð´Ð¾Ð²</div>
-                    <div style="background: #dc3545; height: 4px; border-radius: 2px; width: ${percentage}%; margin-top: 5px;"></div>
-                </div>
-                <div class="item-amount negative">-${formatCurrency(amount)}</div>
-            </div>
-        `;
-    }).join('');
-}
-
-function getPeriodDisplayName(period) {
-    const now = new Date();
-    const monthNames = [
-        'Ð¯Ð½Ð²Ð°Ñ€ÑŒ', 'Ð¤ÐµÐ²Ñ€Ð°Ð»ÑŒ', 'ÐœÐ°Ñ€Ñ‚', 'ÐÐ¿Ñ€ÐµÐ»ÑŒ', 'ÐœÐ°Ð¹', 'Ð˜ÑŽÐ½ÑŒ',
-        'Ð˜ÑŽÐ»ÑŒ', 'ÐÐ²Ð³ÑƒÑÑ‚', 'Ð¡ÐµÐ½Ñ‚ÑÐ±Ñ€ÑŒ', 'ÐžÐºÑ‚ÑÐ±Ñ€ÑŒ', 'ÐÐ¾ÑÐ±Ñ€ÑŒ', 'Ð”ÐµÐºÐ°Ð±Ñ€ÑŒ'
-    ];
-    
-    switch (period) {
-        case 'current-month':
-            return `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
-        case 'last-month':
-            const lastMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
-            const lastMonthYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
-            return `${monthNames[lastMonth]} ${lastMonthYear}`;
-        case 'all-time':
-            return 'Ð—Ð° Ð²ÑÐµ Ð²Ñ€ÐµÐ¼Ñ';
-        default:
-            return period;
-    }
-}
-
-function updateOptionalExpensesList() {
-    const container = document.getElementById('optional-expenses-list');
-    const expenses = data.plannedExpenses.filter(exp => !exp.linkedToIncomeId && !exp.isRequired);
-    
-    if (expenses.length === 0) {
-        container.innerHTML = '<div class="item" style="text-align: center; color: #666;">ÐÐµÑ‚ Ð½ÐµÐ¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ñ… Ñ€Ð°ÑÑ…Ð¾Ð´Ð¾Ð²</div>';
-        return;
-    }
-    
-    container.innerHTML = expenses.map(expense => `
-        <div class="item">
-            <div class="item-info">
-                <div class="item-name">${expense.name}</div>
-                <div class="item-details">
-                    ${expense.category} â€¢ ${expense.plannedDate ? formatDate(expense.plannedDate) : 'Ð”Ð°Ñ‚Ð° Ð½Ðµ ÑƒÐºÐ°Ð·Ð°Ð½Ð°'}
-                </div>
-            </div>
-            <div class="item-amount">${formatCurrency(expense.amount)}</div>
-            <div class="item-actions">
-                <button class="icon-btn edit" onclick="editExpense('${expense.id}')" title="Ð˜Ð·Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ">âœï¸</button>
-                <button class="icon-btn complete" onclick="executeExpense('${expense.id}')" title="Ð’Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ">âœ…</button>
-                <button class="icon-btn delete" onclick="deleteExpense('${expense.id}')" title="Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ">ðŸ—‘ï¸</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-
-        let currentEditingAccountId = null;
-
-function editAccount(accountId) {
-    const account = data.accounts.find(acc => acc.id === accountId);
-    if (!account) return;
-    
-    currentEditingAccountId = accountId;
-    
-    const form = document.getElementById('edit-account-form');
-    form.name.value = account.name;
-    form.balance.value = account.balance;
-    
-    openModal('edit-account-modal');
-}
-
-function editLinkedExpense(expenseId) {
-    const expense = data.plannedExpenses.find(exp => exp.id === expenseId);
-    if (!expense) return;
-    
-    currentEditingLinkedExpenseId = expenseId;
-    
-    const form = document.getElementById('edit-linked-expense-form');
-    form.name.value = expense.name;
-    form.category.value = expense.category;
-    form.amount.value = expense.amount;
-    form.plannedDate.value = expense.plannedDate || '';
-    
-    openModal('edit-linked-expense-modal');
-}
-
-function handleEditLinkedExpense(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    
-    const expense = data.plannedExpenses.find(exp => exp.id === currentEditingLinkedExpenseId);
-    if (expense) {
-        expense.name = formData.get('name');
-        expense.category = formData.get('category');
-        expense.amount = parseFloat(formData.get('amount'));
-        expense.plannedDate = formData.get('plannedDate') || null;
-        
-        saveData();
-        updateUI();
-
-// ÐžÐ±Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð°Ð½Ð°Ð»Ð¸Ñ‚Ð¸ÐºÑƒ Ð¿Ñ€Ð¸ Ð¿ÐµÑ€ÐµÑ…Ð¾Ð´Ðµ Ð½Ð° Ð²ÐºÐ»Ð°Ð´ÐºÑƒ
-if (tabName === 'analytics') {
-    updateAnalytics();
-}
-    }
-    
-    closeModal('edit-linked-expense-modal');
-    currentEditingLinkedExpenseId = null;
-}
-
-function executeLinkedExpense(expenseId, incomeId) {
-    const expense = data.plannedExpenses.find(exp => exp.id === expenseId);
-    if (!expense) return;
-    
-    currentExecutingLinkedExpenseId = expenseId;
-    currentExecutingLinkedExpenseIncomeId = incomeId;
-    
-    document.getElementById('execute-linked-expense-info').innerHTML = `
-    <div style="margin-bottom: 15px;">
-        <strong>${expense.name}</strong><br>
-        ${expense.category}<br>
-        ${formatCurrency(expense.amount)}<br>
-        <small style="color: #666;">Ð Ð°ÑÑ…Ð¾Ð´ Ð±ÑƒÐ´ÐµÑ‚ ÑÐ¿Ð¸ÑÐ°Ð½ Ñ Ð²Ñ‹Ð±Ñ€Ð°Ð½Ð½Ð¾Ð³Ð¾ ÑÑ‡ÐµÑ‚Ð°. ÐŸÐ¾ÑÐ»Ðµ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ñ Ð¾Ð½ Ð±Ð¾Ð»ÑŒÑˆÐµ Ð½Ðµ Ð±ÑƒÐ´ÐµÑ‚ ÑƒÑ‡Ð¸Ñ‚Ñ‹Ð²Ð°Ñ‚ÑŒÑÑ Ð² Ð¿Ð»Ð°Ð½Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ð¸ Ð´Ð¾Ñ…Ð¾Ð´Ð°.</small>
-    </div>
-`;
-    
-    openModal('execute-linked-expense-modal');
-}
-
-function confirmExecuteLinkedExpense() {
-    const accountId = document.getElementById('execute-linked-expense-account').value;
-    if (!accountId) {
-        alert('Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÑÑ‡ÐµÑ‚');
-        return;
-    }
-    
-    const expense = data.plannedExpenses.find(exp => exp.id === currentExecutingLinkedExpenseId);
-    const income = data.plannedIncomes.find(inc => inc.id === currentExecutingLinkedExpenseIncomeId);
-    const account = data.accounts.find(acc => acc.id === accountId);
-    
-    if (!expense || !account) return;
-    
-    if (account.balance < expense.amount) {
-        alert('ÐÐµÐ´Ð¾ÑÑ‚Ð°Ñ‚Ð¾Ñ‡Ð½Ð¾ ÑÑ€ÐµÐ´ÑÑ‚Ð² Ð½Ð° ÑÑ‡ÐµÑ‚Ðµ');
-        return;
-    }
-    
-    // Ð¡Ð¿Ð¸ÑÐ°Ñ‚ÑŒ Ñ ÑÑ‡ÐµÑ‚Ð°
-    account.balance -= expense.amount;
-    
-    // Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð² Ð¸ÑÑ‚Ð¾Ñ€Ð¸ÑŽ
-    // Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð² Ð¸ÑÑ‚Ð¾Ñ€Ð¸ÑŽ
-data.completedTransactions.push({
-    id: generateId(),
-    name: expense.name,
-    category: expense.category,
-    amount: expense.amount,
-    date: new Date().toISOString().split('T')[0],
-    type: 'expense',
-    accountName: account.name
-});
-    
-    // Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð½Ñ‹Ð¹ Ñ€Ð°ÑÑ…Ð¾Ð´
-    data.plannedExpenses = data.plannedExpenses.filter(exp => exp.id !== currentExecutingLinkedExpenseId);
-    
-    saveData();
-    updateUI();
-    closeModal('execute-linked-expense-modal');
-    currentExecutingLinkedExpenseId = null;
-    currentExecutingLinkedExpenseIncomeId = null;
-}
-
-function deleteLinkedExpense(expenseId) {
-    if (confirm('Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¿Ñ€Ð¸Ð²ÑÐ·Ð°Ð½Ð½Ñ‹Ð¹ Ñ€Ð°ÑÑ…Ð¾Ð´?')) {
-        data.plannedExpenses = data.plannedExpenses.filter(exp => exp.id !== expenseId);
-        saveData();
-        updateUI();
-    }
-}
-
-function handleEditAccount(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    
-    const account = data.accounts.find(acc => acc.id === currentEditingAccountId);
-    if (account) {
-        account.name = formData.get('name');
-        account.balance = parseFloat(formData.get('balance'));
-        
-        saveData();
-        updateUI();
-    }
-    
-    closeModal('edit-account-modal');
-    currentEditingAccountId = null;
-}
         function updatePlannedIncomesList() {
             const container = document.getElementById('planned-incomes-list');
-    
-    if (data.plannedIncomes.length === 0) {
-        container.innerHTML = '<div class="item" style="text-align: center; color: #666;">ÐÐµÑ‚ Ð¿Ð»Ð°Ð½Ð¸Ñ€ÑƒÐµÐ¼Ñ‹Ñ… Ð´Ð¾Ñ…Ð¾Ð´Ð¾Ð²</div>';
-        return;
-    }
-    
-    // Ð¡Ð¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²ÐºÐ° Ð¿Ð¾ Ð´Ð°Ñ‚Ðµ (Ð´Ð¾Ñ…Ð¾Ð´Ñ‹ Ð±ÐµÐ· Ð´Ð°Ñ‚Ñ‹ Ð² ÐºÐ¾Ð½ÐµÑ†)
-    const sortedIncomes = [...data.plannedIncomes].sort((a, b) => {
-        if (!a.plannedDate && !b.plannedDate) return 0;
-        if (!a.plannedDate) return 1;
-        if (!b.plannedDate) return -1;
-        return new Date(a.plannedDate) - new Date(b.plannedDate);
-    });
+            
+            if (data.plannedIncomes.length === 0) {
+                container.innerHTML = '<div class="item" style="text-align: center; color: #666;">Нет планируемых доходов</div>';
+                return;
+            }
             
             container.innerHTML = data.plannedIncomes.map(income => {
                 const linkedExpenses = data.plannedExpenses.filter(exp => exp.linkedToIncomeId === income.id);
@@ -1525,65 +783,27 @@ function handleEditAccount(e) {
                 const remaining = income.amount - linkedSum;
                 
                 return `
-                    <div class="item expandable" onclick="toggleIncomeExpansion('${income.id}')">
+                    <div class="item">
                         <div class="item-info">
                             <div class="item-name">${income.name}</div>
                             <div class="item-details">
-                                ${income.category} â€¢ ${income.plannedDate ? formatDate(income.plannedDate) : 'Ð”Ð°Ñ‚Ð° Ð½Ðµ ÑƒÐºÐ°Ð·Ð°Ð½Ð°'}
+                                ${income.category} • ${income.plannedDate ? formatDate(income.plannedDate) : 'Дата не указана'}
                             </div>
-                            <div class="linked-expenses" id="linked-expenses-${income.id}" style="display: none;">
-    ${linkedExpenses.map(exp => `
-        <div class="linked-expense">
-            <div class="item" style="margin: 0; padding: 8px 0; border: none;">
-                <div class="item-info">
-                    <div class="item-name" style="font-size: 12px;">- ${exp.name}</div>
-                    <div class="item-details" style="font-size: 10px;">
-                        ${exp.category} â€¢ ${exp.plannedDate ? formatDate(exp.plannedDate) : 'Ð”Ð°Ñ‚Ð° Ð½Ðµ ÑƒÐºÐ°Ð·Ð°Ð½Ð°'}
-                    </div>
-                </div>
-                <div class="item-amount" style="font-size: 12px;">${formatCurrency(exp.amount)}</div>
-                <div class="item-actions">
-                    <button class="icon-btn edit" style="width: 24px; height: 24px;" onclick="editLinkedExpense('${exp.id}')" title="Ð˜Ð·Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ">âœï¸</button>
-                    <button class="icon-btn complete" style="width: 24px; height: 24px;" onclick="executeLinkedExpense('${exp.id}', '${income.id}')" title="Ð’Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ">âœ…</button>
-                    <button class="icon-btn delete" style="width: 24px; height: 24px;" onclick="deleteLinkedExpense('${exp.id}')" title="Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ">ðŸ—‘ï¸</button>
-                </div>
-            </div>
-        </div>
-    `).join('')}
-</div>
                         </div>
                         <div class="income-display">
                             <div class="item-amount">${formatCurrency(remaining)}/${formatCurrency(income.amount)}</div>
-                        </div>
-                        <div class="item-actions" onclick="event.stopPropagation()">
-                            <button class="icon-btn edit" onclick="editIncome('${income.id}')" title="Ð˜Ð·Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ">âœï¸</button>
-                            <button class="icon-btn add" onclick="addLinkedExpense('${income.id}')" title="Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ñ€Ð°ÑÑ…Ð¾Ð´">âž•</button>
-                            <button class="icon-btn complete" onclick="executeIncome('${income.id}')" title="Ð’Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ">âœ…</button>
-                            <button class="icon-btn delete" onclick="deleteIncome('${income.id}')" title="Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ">ðŸ—‘ï¸</button>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function toggleIncomeExpansion(incomeId) {
-            const expensesDiv = document.getElementById(`linked-expenses-${incomeId}`);
-            const isVisible = expensesDiv.style.display !== 'none';
-            expensesDiv.style.display = isVisible ? 'none' : 'block';
-        }
-
         function updateAccountsList() {
-            updateAccountsGroup('checking-accounts-list', 'checking');
-            updateAccountsGroup('savings-accounts-list', 'savings');
-            updateAccountsGroup('limit-accounts-list', 'savings-limit');
-        }
-
-        function updateAccountsGroup(containerId, type) {
-            const container = document.getElementById(containerId);
-            const accounts = data.accounts.filter(acc => acc.type === type);
+            const container = document.getElementById('checking-accounts-list');
+            const accounts = data.accounts.filter(acc => acc.type === 'checking');
             
             if (accounts.length === 0) {
-                container.innerHTML = '<div class="item" style="text-align: center; color: #666;">ÐÐµÑ‚ ÑÑ‡ÐµÑ‚Ð¾Ð²</div>';
+                container.innerHTML = '<div class="item" style="text-align: center; color: #666;">Нет счетов</div>';
                 return;
             }
             
@@ -1591,15 +811,8 @@ function handleEditAccount(e) {
                 <div class="item">
                     <div class="item-info">
                         <div class="item-name">${account.name}</div>
-                        <div class="item-details">
-                            ${account.type === 'savings-limit' ? `Ð¦ÐµÐ»ÑŒ: ${formatCurrency(account.targetAmount || 0)}` : ''}
-                        </div>
                     </div>
                     <div class="item-amount">${formatCurrency(account.balance)}</div>
-                    <div class="item-actions">
-    <button class="icon-btn edit" onclick="editAccount('${account.id}')" title="Ð˜Ð·Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ">âœï¸</button>
-    <button class="icon-btn delete" onclick="deleteAccount('${account.id}')" title="Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ">ðŸ—‘ï¸</button>
-</div>
                 </div>
             `).join('');
         }
@@ -1609,7 +822,7 @@ function handleEditAccount(e) {
             const sortedTransactions = [...data.completedTransactions].sort((a, b) => new Date(b.date) - new Date(a.date));
             
             if (sortedTransactions.length === 0) {
-                container.innerHTML = '<div class="item" style="text-align: center; color: #666;">ÐÐµÑ‚ Ð¾Ð¿ÐµÑ€Ð°Ñ†Ð¸Ð¹</div>';
+                container.innerHTML = '<div class="item" style="text-align: center; color: #666;">Нет операций</div>';
                 return;
             }
             
@@ -1618,8 +831,8 @@ function handleEditAccount(e) {
                     <div class="item-info">
                         <div class="item-name">${transaction.name}</div>
                         <div class="item-details">
-                            ${transaction.category} â€¢ ${formatDate(transaction.date)} â€¢ ${transaction.type}
-                            ${transaction.accountName ? ` â€¢ ${transaction.accountName}` : ''}
+                            ${transaction.category} • ${formatDate(transaction.date)}
+                            ${transaction.accountName ? ` • ${transaction.accountName}` : ''}
                         </div>
                     </div>
                     <div class="item-amount ${transaction.type === 'income' ? 'positive' : 'negative'}">
@@ -1628,549 +841,33 @@ function handleEditAccount(e) {
                 </div>
             `).join('');
         }
+
         function updateCategoriesList() {
-    const container = document.getElementById('categories-list');
-    if (!container) return;
-    
-    container.innerHTML = `
-        <div class="section">
-            <div class="section-header">ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸ Ð´Ð¾Ñ…Ð¾Ð´Ð¾Ð²</div>
-            ${data.categories.income.map((cat, index) => `
-                <div class="item">
-                    <div class="item-info">
-                        <div class="item-name">${cat}</div>
-                    </div>
-                    <div class="item-actions">
-                        <button class="icon-btn delete" onclick="deleteCategory('income', ${index})" title="Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ">ðŸ—‘ï¸</button>
-                    </div>
+            const container = document.getElementById('categories-list');
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div class="section" style="margin-bottom: 20px;">
+                    <div class="section-header">Категории доходов</div>
+                    ${data.categories.income.map((cat, index) => `
+                        <div class="item">
+                            <div class="item-info">
+                                <div class="item-name">${cat}</div>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
-            `).join('')}
-            <button class="btn btn-secondary" onclick="addCategory('income')">âž• Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑŽ Ð´Ð¾Ñ…Ð¾Ð´Ð°</button>
-        </div>
-        <div class="section">
-            <div class="section-header">ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸ Ñ€Ð°ÑÑ…Ð¾Ð´Ð¾Ð²</div>
-            ${data.categories.expense.map((cat, index) => `
-                <div class="item">
-                    <div class="item-info">
-                        <div class="item-name">${cat}</div>
-                    </div>
-                    <div class="item-actions">
-                        <button class="icon-btn delete" onclick="deleteCategory('expense', ${index})" title="Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ">ðŸ—‘ï¸</button>
-                    </div>
-                </div>
-                `).join('')}
-                <button class="btn btn-secondary" onclick="addCategory('expense')">âž• Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑŽ Ñ€Ð°ÑÑ…Ð¾Ð´Ð°</button>
-            </div>
-            `;
-        }
-        
-        // Event Listeners Setup
-        function setupEventListeners() {
-            // Metric cards expansion
-            document.getElementById('total-metric').addEventListener('click', () => {
-                const details = document.getElementById('total-details');
-                details.style.display = details.style.display === 'block' ? 'none' : 'block';
-            });
-            
-            document.getElementById('planned-metric').addEventListener('click', () => {
-                const details = document.getElementById('planned-details');
-                details.style.display = details.style.display === 'block' ? 'none' : 'block';
-            });
-            
-            // Account type change listener
-            document.querySelector('select[name="type"]').addEventListener('change', function() {
-                const limitGroup = document.getElementById('limit-group');
-                limitGroup.style.display = this.value === 'savings-limit' ? 'block' : 'none';
-            });
-
-            // Form submissions
-            document.getElementById('add-account-form').addEventListener('submit', handleAddAccount);
-            document.getElementById('transfer-form').addEventListener('submit', handleTransfer);
-            document.getElementById('expense-form').addEventListener('submit', handleAddExpense);
-            document.getElementById('planned-expense-form').addEventListener('submit', handleAddPlannedExpense);
-            document.getElementById('income-form').addEventListener('submit', handleAddIncome);
-            document.getElementById('planned-income-form').addEventListener('submit', handleAddPlannedIncome);
-            document.getElementById('edit-income-form').addEventListener('submit', handleEditIncome);
-            document.getElementById('add-linked-expense-form').addEventListener('submit', handleAddLinkedExpense);
-            document.getElementById('edit-account-form').addEventListener('submit', handleEditAccount);
-            document.getElementById('edit-linked-expense-form').addEventListener('submit', handleEditLinkedExpense);
-        }
-
-        // Form Handlers
-        function handleAddAccount(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            const account = {
-                id: generateId(),
-                name: formData.get('name'),
-                balance: parseFloat(formData.get('balance')),
-                type: formData.get('type'),
-                targetAmount: formData.get('targetAmount') ? parseFloat(formData.get('targetAmount')) : null
-            };
-            
-            data.accounts.push(account);
-            saveData();
-            updateUI();
-            closeModal('add-account-modal');
-        }
-
-        function handleTransfer(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            const fromId = formData.get('fromAccount');
-            const toId = formData.get('toAccount');
-            const amount = parseFloat(formData.get('amount'));
-            
-            const fromAccount = data.accounts.find(acc => acc.id === fromId);
-            const toAccount = data.accounts.find(acc => acc.id === toId);
-            
-            if (fromAccount.balance < amount) {
-                alert('ÐÐµÐ´Ð¾ÑÑ‚Ð°Ñ‚Ð¾Ñ‡Ð½Ð¾ ÑÑ€ÐµÐ´ÑÑ‚Ð² Ð½Ð° ÑÑ‡ÐµÑ‚Ðµ');
-                return;
-            }
-            
-            fromAccount.balance -= amount;
-            toAccount.balance += amount;
-            
-            // Add to history
-            data.completedTransactions.push({
-                id: generateId(),
-                name: `ÐŸÐµÑ€ÐµÐ²Ð¾Ð´: ${fromAccount.name} â†’ ${toAccount.name}`,
-                category: 'ÐŸÐµÑ€ÐµÐ²Ð¾Ð´',
-                amount: amount,
-                date: new Date().toISOString().split('T')[0],
-                type: 'transfer',
-                accountName: `${fromAccount.name} â†’ ${toAccount.name}`
-            });
-            
-            saveData();
-            updateUI();
-            closeModal('transfer-modal');
-        }
-
-        function handleAddExpense(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            const accountId = formData.get('account');
-            const amount = parseFloat(formData.get('amount'));
-            const account = data.accounts.find(acc => acc.id === accountId);
-            
-            if (account.balance < amount) {
-                alert('ÐÐµÐ´Ð¾ÑÑ‚Ð°Ñ‚Ð¾Ñ‡Ð½Ð¾ ÑÑ€ÐµÐ´ÑÑ‚Ð² Ð½Ð° ÑÑ‡ÐµÑ‚Ðµ');
-                return;
-            }
-            
-            account.balance -= amount;
-            
-            // Add to history
-            data.completedTransactions.push({
-                id: generateId(),
-                name: formData.get('name'),
-                category: formData.get('category'),
-                amount: amount,
-                date: new Date().toISOString().split('T')[0],
-                type: 'expense',
-                accountName: account.name
-            });
-            
-            saveData();
-            updateUI();
-            closeModal('expense-modal');
-        }
-
-        function handleAddPlannedExpense(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            const expense = {
-                id: generateId(),
-                name: formData.get('name'),
-                category: formData.get('category'),
-                amount: parseFloat(formData.get('amount')),
-                plannedDate: formData.get('plannedDate') || null,
-                isRequired: formData.get('isRequired') === 'on',
-                linkedToIncomeId: null
-            };
-            
-            data.plannedExpenses.push(expense);
-            saveData();
-            updateUI();
-            closeModal('planned-expense-modal');
-        }
-
-        function handleAddIncome(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            const accountId = formData.get('account');
-            const amount = parseFloat(formData.get('amount'));
-            const account = data.accounts.find(acc => acc.id === accountId);
-            
-            account.balance += amount;
-            
-            // Add to history
-            data.completedTransactions.push({
-                id: generateId(),
-                name: formData.get('name'),
-                category: formData.get('category'),
-                amount: amount,
-                date: new Date().toISOString().split('T')[0],
-                type: 'income',
-                accountName: account.name
-            });
-            
-            saveData();
-            updateUI();
-            closeModal('income-modal');
-        }
-
-        function handleAddPlannedIncome(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            const income = {
-                id: generateId(),
-                name: formData.get('name'),
-                category: formData.get('category'),
-                amount: parseFloat(formData.get('amount')),
-                plannedDate: formData.get('plannedDate') || null,
-                accountId: formData.get('account') || null
-            };
-            
-            data.plannedIncomes.push(income);
-            saveData();
-            updateUI();
-            closeModal('planned-income-modal');
-        }
-
-        function handleEditIncome(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            const income = data.plannedIncomes.find(inc => inc.id === currentEditingIncomeId);
-            if (income) {
-                income.name = formData.get('name');
-                income.category = formData.get('category');
-                income.amount = parseFloat(formData.get('amount'));
-                income.plannedDate = formData.get('plannedDate') || null;
-                income.accountId = formData.get('account') || null;
-                
-                saveData();
-                updateUI();
-            }
-            
-            closeModal('edit-income-modal');
-            currentEditingIncomeId = null;
-        }
-
-        function handleAddLinkedExpense(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            const expense = {
-                id: generateId(),
-                name: formData.get('name'),
-                category: formData.get('category'),
-                amount: parseFloat(formData.get('amount')),
-                plannedDate: formData.get('plannedDate') || null,
-                isRequired: false,
-                linkedToIncomeId: currentAddingExpenseToIncomeId
-            };
-            
-            data.plannedExpenses.push(expense);
-            saveData();
-            updateUI();
-            closeModal('add-linked-expense-modal');
-            currentAddingExpenseToIncomeId = null;
-        }
-
-        // Action Functions
-        function editIncome(incomeId) {
-            const income = data.plannedIncomes.find(inc => inc.id === incomeId);
-            if (!income) return;
-            
-            currentEditingIncomeId = incomeId;
-            
-            const form = document.getElementById('edit-income-form');
-            form.name.value = income.name;
-            form.category.value = income.category;
-            form.amount.value = income.amount;
-            form.plannedDate.value = income.plannedDate || '';
-            form.account.value = income.accountId || '';
-            
-            openModal('edit-income-modal');
-        }
-
-        function addLinkedExpense(incomeId) {
-            currentAddingExpenseToIncomeId = incomeId;
-            openModal('add-linked-expense-modal');
-        }
-
-        function executeIncome(incomeId) {
-            const income = data.plannedIncomes.find(inc => inc.id === incomeId);
-            if (!income) return;
-            
-            currentExecutingIncomeId = incomeId;
-            
-            document.getElementById('execute-income-info').innerHTML = `
-                <div style="margin-bottom: 15px;">
-                    <strong>${income.name}</strong><br>
-                    ${income.category}<br>
-                    ${formatCurrency(income.amount)}
+                <div class="section">
+                    <div class="section-header">Категории расходов</div>
+                    ${data.categories.expense.map((cat, index) => `
+                        <div class="item">
+                            <div class="item-info">
+                                <div class="item-name">${cat}</div>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             `;
-            
-            const select = document.getElementById('execute-income-account');
-            select.value = income.accountId || '';
-            
-            openModal('execute-income-modal');
-        }
-
-        function confirmExecuteIncome() {
-            const accountId = document.getElementById('execute-income-account').value;
-            if (!accountId) {
-                alert('Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÑÑ‡ÐµÑ‚');
-                return;
-            }
-            
-            const income = data.plannedIncomes.find(inc => inc.id === currentExecutingIncomeId);
-            const account = data.accounts.find(acc => acc.id === accountId);
-            
-            if (!income || !account) return;
-            
-            // Add money to account
-            account.balance += income.amount;
-            
-            // Add to history
-            data.completedTransactions.push({
-                id: generateId(),
-                name: income.name,
-                category: income.category,
-                amount: income.amount,
-                date: new Date().toISOString().split('T')[0],
-                type: 'income',
-                accountName: account.name
-            });
-            
-            // Move linked expenses to regular planned expenses
-            const linkedExpenses = data.plannedExpenses.filter(exp => exp.linkedToIncomeId === currentExecutingIncomeId);
-            linkedExpenses.forEach(expense => {
-                expense.linkedToIncomeId = null;
-                expense.isRequired = true;
-            });
-            
-            // Remove executed income
-            data.plannedIncomes = data.plannedIncomes.filter(inc => inc.id !== currentExecutingIncomeId);
-            
-            saveData();
-            updateUI();
-            closeModal('execute-income-modal');
-            currentExecutingIncomeId = null;
-        }
-
-        function executeExpense(expenseId) {
-            const expense = data.plannedExpenses.find(exp => exp.id === expenseId);
-            if (!expense) return;
-            
-            currentExecutingExpenseId = expenseId;
-            
-            document.getElementById('execute-expense-info').innerHTML = `
-                <div style="margin-bottom: 15px;">
-                    <strong>${expense.name}</strong><br>
-                    ${expense.category}<br>
-                    ${formatCurrency(expense.amount)}
-                </div>
-            `;
-            
-            openModal('execute-expense-modal');
-        }
-
-        function confirmExecuteExpense() {
-            const accountId = document.getElementById('execute-expense-account').value;
-            if (!accountId) {
-                alert('Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÑÑ‡ÐµÑ‚');
-                return;
-            }
-            
-            const expense = data.plannedExpenses.find(exp => exp.id === currentExecutingExpenseId);
-            const account = data.accounts.find(acc => acc.id === accountId);
-            
-            if (!expense || !account) return;
-            
-            if (account.balance < expense.amount) {
-                alert('ÐÐµÐ´Ð¾ÑÑ‚Ð°Ñ‚Ð¾Ñ‡Ð½Ð¾ ÑÑ€ÐµÐ´ÑÑ‚Ð² Ð½Ð° ÑÑ‡ÐµÑ‚Ðµ');
-                return;
-            }
-            
-            // Deduct money from account
-            account.balance -= expense.amount;
-            
-            // Add to history
-            data.completedTransactions.push({
-                id: generateId(),
-                name: expense.name,
-                category: expense.category,
-                amount: expense.amount,
-                date: new Date().toISOString().split('T')[0],
-                type: 'expense',
-                accountName: account.name
-            });
-            
-            // Remove executed expense
-            data.plannedExpenses = data.plannedExpenses.filter(exp => exp.id !== currentExecutingExpenseId);
-            
-            saveData();
-            updateUI();
-            closeModal('execute-expense-modal');
-            currentExecutingExpenseId = null;
-        }
-
-        function deleteIncome(incomeId) {
-            if (confirm('Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¿Ð»Ð°Ð½Ð¸Ñ€ÑƒÐµÐ¼Ñ‹Ð¹ Ð´Ð¾Ñ…Ð¾Ð´?')) {
-                // Also remove linked expenses
-                data.plannedExpenses = data.plannedExpenses.filter(exp => exp.linkedToIncomeId !== incomeId);
-                data.plannedIncomes = data.plannedIncomes.filter(inc => inc.id !== incomeId);
-                
-                saveData();
-                updateUI();
-            }
-        }
-
-        function deleteExpense(expenseId) {
-            if (confirm('Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¿Ð»Ð°Ð½Ð¸Ñ€ÑƒÐµÐ¼Ñ‹Ð¹ Ñ€Ð°ÑÑ…Ð¾Ð´?')) {
-                data.plannedExpenses = data.plannedExpenses.filter(exp => exp.id !== expenseId);
-                
-                saveData();
-                updateUI();
-            }
-        }
-
-        function editExpense(expenseId) {
-            const expense = data.plannedExpenses.find(exp => exp.id === expenseId);
-            if (!expense) return;
-            
-            const form = document.getElementById('planned-expense-form');
-            form.name.value = expense.name;
-            form.category.value = expense.category;
-            form.amount.value = expense.amount;
-            form.plannedDate.value = expense.plannedDate || '';
-            form.isRequired.checked = expense.isRequired;
-            
-            // Change form submission to edit mode
-            const submitHandler = function(e) {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                
-                expense.name = formData.get('name');
-                expense.category = formData.get('category');
-                expense.amount = parseFloat(formData.get('amount'));
-                expense.plannedDate = formData.get('plannedDate') || null;
-                expense.isRequired = formData.get('isRequired') === 'on';
-                
-                saveData();
-                updateUI();
-                closeModal('planned-expense-modal');
-                
-                // Restore original handler
-                document.getElementById('planned-expense-form').removeEventListener('submit', submitHandler);
-                document.getElementById('planned-expense-form').addEventListener('submit', handleAddPlannedExpense);
-            };
-            
-            document.getElementById('planned-expense-form').removeEventListener('submit', handleAddPlannedExpense);
-            document.getElementById('planned-expense-form').addEventListener('submit', submitHandler);
-            
-            openModal('planned-expense-modal');
-        }
-
-
-        function addCategory(type) {
-    const name = prompt(`ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ Ð½Ð¾Ð²Ð¾Ð¹ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸ ${type === 'income' ? 'Ð´Ð¾Ñ…Ð¾Ð´Ð°' : 'Ñ€Ð°ÑÑ…Ð¾Ð´Ð°'}:`);
-    if (name && name.trim()) {
-        data.categories[type].push(name.trim());
-        saveData();
-        updateUI();
-    }
-}
-
-function deleteCategory(type, index) {
-    if (confirm('Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑŽ?')) {
-        data.categories[type].splice(index, 1);
-        saveData();
-        updateUI();
-    }
-}
-
-function updateCategoriesList() {
-    const container = document.getElementById('categories-list');
-    if (!container) return;
-    
-    container.innerHTML = `
-        <div class="section" style="margin-bottom: 20px;">
-            <div class="section-header">ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸ Ð´Ð¾Ñ…Ð¾Ð´Ð¾Ð²</div>
-            ${data.categories.income.map((cat, index) => `
-                <div class="item">
-                    <div class="item-info">
-                        <div class="item-name">${cat}</div>
-                    </div>
-                    <div class="item-actions">
-                        <button class="icon-btn delete" onclick="deleteCategory('income', ${index})" title="Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ">ðŸ—‘ï¸</button>
-                    </div>
-                </div>
-            `).join('')}
-            <div style="padding: 15px 20px;">
-                <button class="btn btn-secondary" onclick="addCategory('income')">âž• Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑŽ Ð´Ð¾Ñ…Ð¾Ð´Ð°</button>
-            </div>
-        </div>
-        <div class="section">
-            <div class="section-header">ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸ Ñ€Ð°ÑÑ…Ð¾Ð´Ð¾Ð²</div>
-            ${data.categories.expense.map((cat, index) => `
-                <div class="item">
-                    <div class="item-info">
-                        <div class="item-name">${cat}</div>
-                    </div>
-                    <div class="item-actions">
-                        <button class="icon-btn delete" onclick="deleteCategory('expense', ${index})" title="Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ">ðŸ—‘ï¸</button>
-                    </div>
-                </div>
-            `).join('')}
-            <div style="padding: 15px 20px;">
-                <button class="btn btn-secondary" onclick="addCategory('expense')">âž• Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑŽ Ñ€Ð°ÑÑ…Ð¾Ð´Ð°</button>
-            </div>
-        </div>
-    `;
-}
-
-function updateCategorySelects(modalId) {
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
-    
-    const categorySelect = modal.querySelector('select[name="category"]');
-    if (!categorySelect) return;
-    
-    const isIncomeModal = modalId.includes('income');
-    const categories = isIncomeModal ? data.categories.income : data.categories.expense;
-    
-    categorySelect.innerHTML = '<option value="">Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑŽ</option>' +
-        categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-}
-
-        function deleteAccount(accountId) {
-            const account = data.accounts.find(acc => acc.id === accountId);
-            if (!account) return;
-            
-            if (account.balance !== 0) {
-                alert('ÐÐµÐ»ÑŒÐ·Ñ ÑƒÐ´Ð°Ð»Ð¸Ñ‚ÑŒ ÑÑ‡ÐµÑ‚ Ñ Ð±Ð°Ð»Ð°Ð½ÑÐ¾Ð¼ Ð¾Ñ‚Ð»Ð¸Ñ‡Ð½Ñ‹Ð¼ Ð¾Ñ‚ 0');
-                return;
-            }
-            
-            if (confirm('Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ ÑÑ‡ÐµÑ‚?')) {
-                data.accounts = data.accounts.filter(acc => acc.id !== accountId);
-                saveData();
-                updateUI();
-            }
         }
 
         // Initialize app when page loads
